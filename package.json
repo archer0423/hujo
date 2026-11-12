@@ -1,0 +1,22 @@
+{
+  "name": "hujo",
+  "version": "1.0.0",
+  "description": "一个不太成熟的2D游戏框架",
+  "keywords": [
+    "hujo",
+    "game-framework",
+    "cocos-creator"
+  ],
+  "homepage": "https://github.com/archer0423/hujo#readme",
+  "bugs": {
+    "url": "https://github.com/archer0423/hujo/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/archer0423/hujo.git"
+  },
+  "license": "MIT",
+  "author": "archer0423",
+  "type": "module",
+  "scripts": {}
+}
