@@ -18,5 +18,8 @@
   "license": "MIT",
   "author": "archer0423",
   "type": "module",
-  "scripts": {}
+  "scripts": {},
+  "devDependencies": {
+    "@cocos/creator-types": "^3.8.8"
+  }
 }
