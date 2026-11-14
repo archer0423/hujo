@@ -17,3 +17,6 @@ export * from './cord/action';
 export * from './knot/native';
 // skill
 export * from './skill/base64';
+export * from './skill/color';
+export * from './skill/json';
+export * from './skill/kindof';
