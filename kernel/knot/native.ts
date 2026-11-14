@@ -22,8 +22,9 @@ export interface NativeApi extends KnotApi<KnotOptions> {
    * 添加事件监听器
    * @param event 事件
    * @param listener 监听器
+   * @param once 是否一次性，默认 false
    */
-  on(event: string, listener: NativeEventListener): void;
+  on(event: string, listener: NativeEventListener, once?: boolean): void;
   /**
    * 添加一次性事件监听器
    * @param event 事件
@@ -63,24 +64,23 @@ export class Native extends Knot implements NativeApi {
     return 'native';
   }
 
-  public on(event: string, listener: NativeEventListener) {
+  public on(event: string, listener: NativeEventListener, once: boolean = false) {
     if (!sys.isNative) return;
+
+    if (event === '' || event.length <= 2) {
+      this.logger.warn(`事件必须是有效的字符串，且长度不少于2 >>> ${event}`);
+      return;
+    }
 
     if (this.__channel.has(event)) {
       this.off(event);
     }
 
-    this.__addEventListener(event, listener);
+    this.__addEventListener(event, listener, once);
   }
 
   public once(event: string, listener: NativeEventListener) {
-    if (!sys.isNative) return;
-
-    if (this.__channel.has(event)) {
-      this.off(event);
-    }
-
-    this.__addEventListener(event, listener, true);
+    this.on(event, listener, true);
   }
 
   public off(event: string) {
