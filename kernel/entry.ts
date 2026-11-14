@@ -22,6 +22,7 @@ export * from './skill/color';
 export * from './skill/dict';
 export * from './skill/digit';
 export * from './skill/env';
+export * from './skill/filter';
 export * from './skill/json';
 export * from './skill/kindof';
 export * from './skill/web';
