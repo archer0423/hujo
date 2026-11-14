@@ -1,9 +1,20 @@
-import { native } from 'cc';
+import { native, sys } from 'cc';
 
 import { Knot, KnotApi, KnotOptions } from '../entry';
 
 /** 原生事件监听器 */
-export type NativeEventListener = native.OnNativeEventListener;
+export type NativeEventListener = (data?: NativeRawData) => void;
+
+/** 原生传递数据类型 */
+export type NativeDataType = 'boolean' | 'int' | 'float' | 'string' | 'object';
+
+/** 原生传递数据 */
+export type NativeRawData =
+  | boolean
+  | number
+  | string
+  | { [key: string]: NativeRawData }
+  | NativeRawData[];
 
 /** 原生信道结点接口 */
 export interface NativeApi extends KnotApi<KnotOptions> {
@@ -28,6 +39,12 @@ export interface NativeApi extends KnotApi<KnotOptions> {
   clear(): void;
   /** 事件监听器数量 */
   readonly size: number;
+  /**
+   * 向原生层传递事件和数据
+   * @param event 事件
+   * @param arg 入参
+   */
+  dispatch(event: string, arg?: NativeRawData): void;
 }
 
 /**
@@ -47,46 +64,75 @@ export class Native extends Knot implements NativeApi {
   }
 
   public on(event: string, listener: NativeEventListener) {
+    if (!sys.isNative) return;
+
     if (this.__channel.has(event)) {
       this.off(event);
     }
 
-    if (this.__addEventListener(event, listener)) {
-      this.__channel.set(event, listener);
-    }
+    this.__addEventListener(event, listener);
   }
 
   public once(event: string, listener: NativeEventListener) {
+    if (!sys.isNative) return;
+
     if (this.__channel.has(event)) {
       this.off(event);
     }
 
-    const wrapper = (arg: string) => {
-      this.off(event);
-      listener(arg);
-    };
-
-    if (this.__addEventListener(event, wrapper)) {
-      this.__channel.set(event, wrapper);
-    }
+    this.__addEventListener(event, listener, true);
   }
 
   public off(event: string) {
+    if (!sys.isNative) return;
+
     if (this.__channel.has(event)) {
-      if (this.__removeEventListener(event, this.__channel.get(event)!)) {
-        this.__channel.delete(event);
-      }
+      this.__removeEventListener(event, this.__channel.get(event)!);
     }
   }
 
   public clear() {
+    if (!sys.isNative) return;
+
     for (const [event] of this.__channel) {
       this.off(event);
     }
+
+    this.__channel.clear(); // 保底
   }
 
   public get size() {
     return this.__channel.size;
+  }
+
+  public dispatch(event: string, arg?: NativeRawData): void {
+    if (!sys.isNative) return;
+
+    const type = typeof arg;
+    if (type === 'undefined') {
+      this.__dispatch(event);
+    } else {
+      let payload: [NativeDataType, NativeRawData];
+      if (type === 'string') {
+        payload = ['string', arg!];
+      } else if (type === 'number' && Number.isFinite(arg)) {
+        payload = [Number.isInteger(arg) ? 'int' : 'float', arg!];
+      } else if (type === 'boolean') {
+        payload = ['boolean', arg!];
+      } else if (type === 'object' && arg !== null) {
+        payload = ['object', arg!];
+      } else {
+        this.logger.error(`Send 不支持的数据类型: ${type} >>> ${event}`);
+        return;
+      }
+
+      try {
+        const data = JSON.stringify(payload);
+        this.__dispatch(event, data);
+      } catch (e) {
+        this.logger.error(`Send 数据编码失败 >>> ${event}`, e);
+      }
+    }
   }
 
   // protected
@@ -110,13 +156,39 @@ export class Native extends Knot implements NativeApi {
    * @param event 事件
    * @param listener 监听器
    */
-  private __addEventListener(event: string, listener: NativeEventListener) {
+  private __addEventListener(event: string, listener: NativeEventListener, once: boolean = false) {
     try {
-      native.jsbBridgeWrapper.addNativeEventListener(event, listener);
-      return true;
+      const wrapper = (data?: string) => {
+        if (once) {
+          this.off(event);
+        }
+
+        if (typeof data === 'undefined') {
+          listener();
+        } else {
+          try {
+            const [type, payload] = JSON.parse(data);
+            if (
+              (type === 'boolean' ||
+                type === 'int' ||
+                type === 'float' ||
+                type === 'object' ||
+                type === 'string') &&
+              typeof payload
+            ) {
+              listener(payload);
+            } else {
+              this.logger.error(`数据解析错误 >>> ${event}`, data);
+            }
+          } catch (e) {
+            this.logger.error(`数据解析错误 >>> ${event}`, data);
+          }
+        }
+      };
+      native.jsbBridgeWrapper.addNativeEventListener(event, wrapper);
+      this.__channel.set(event, wrapper as NativeEventListener);
     } catch (e) {
-      this.logger.error(`监听注册失败 >>> ${event}`, e);
-      return false;
+      this.logger.error(`添加事件监听失败 >>> ${event}`, e);
     }
   }
 
@@ -127,10 +199,22 @@ export class Native extends Knot implements NativeApi {
   private __removeEventListener(event: string, listener: NativeEventListener) {
     try {
       native.jsbBridgeWrapper.removeNativeEventListener(event, listener);
-      return true;
+      this.__channel.delete(event);
     } catch (e) {
-      this.logger.error(`监听移除失败 >>> ${event}`, e);
-      return false;
+      this.logger.error(`移除事件监听失败 >>> ${event}`, e);
+    }
+  }
+
+  /**
+   * 向原生层传递事件和数据
+   * @param event 事件
+   * @param payload 数据
+   */
+  private __dispatch(event: string, payload?: string) {
+    try {
+      native.jsbBridgeWrapper.dispatchEventToNative(event, payload);
+    } catch (e) {
+      this.logger.error(`Send 向原生层发送消息失败 >>> ${event}`, e);
     }
   }
 }
