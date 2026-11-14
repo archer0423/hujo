@@ -26,4 +26,5 @@ export * from './skill/filter';
 export * from './skill/grapheme';
 export * from './skill/json';
 export * from './skill/kindof';
+export * from './skill/layout';
 export * from './skill/web';
