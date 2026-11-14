@@ -214,6 +214,11 @@ class Journal {
     }
   }
 
+  /** 系统级日志记录器 */
+  public get system() {
+    return this.acquire('system');
+  }
+
   // private
 
   /** 是否关闭输出 */
