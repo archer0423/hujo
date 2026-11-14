@@ -12,9 +12,6 @@ export interface KnotCtor<K extends Knot> {
   new (): K;
 }
 
-/** 连接/断开结果 */
-export type KnotResult = Promise<[boolean, Error?]>;
-
 /** 结点接口 */
 export interface KnotApi<P extends KnotOptions> {
   /** 选项 */
@@ -74,7 +71,7 @@ export abstract class Knot<P extends KnotOptions = {}> implements KnotApi<P> {
     return this.__actionAttach.result!;
   }
 
-  public async detach(): KnotResult {
+  public async detach(): ActionResult {
     if (this.__actionDetach) {
       return this.__actionDetach.promise!;
     }
