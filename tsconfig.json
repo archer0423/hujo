@@ -9,6 +9,7 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "stripInternal": true,
+    "lib": ["ES2018", "DOM"],
     "types": ["@cocos/creator-types/engine", "@cocos/creator-types/editor"]
   },
   "exclude": ["node_modules", "dist", "build"]
