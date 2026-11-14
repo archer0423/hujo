@@ -20,6 +20,7 @@ export * from './knot/native';
 export * from './skill/base64';
 export * from './skill/color';
 export * from './skill/dict';
+export * from './skill/digit';
 export * from './skill/json';
 export * from './skill/kindof';
 export * from './skill/web';
