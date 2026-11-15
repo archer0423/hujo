@@ -539,9 +539,9 @@ function isUint8Array(value: unknown): value is Uint8Array {
 }
 
 /** LZString 接口 */
-export const lzstring = {
+export const LZ = {
   /** 编码为字符串 */
-  encode(data: string): string {
+  Encode(data: string): string {
     if (!isString(data)) return '';
     try {
       return LZString.compress(data);
@@ -550,7 +550,7 @@ export const lzstring = {
     }
   },
   /** 编码为 Base64 */
-  toBase64(data: string): string {
+  ToBase64(data: string): string {
     if (!isString(data)) return '';
     try {
       return LZString.compressToBase64(data);
@@ -559,7 +559,7 @@ export const lzstring = {
     }
   },
   /** 编码为 URIComponent */
-  toURIComponent(data: string): string {
+  ToURIComponent(data: string): string {
     if (!isString(data)) return '';
     try {
       return LZString.compressToEncodedURIComponent(data);
@@ -568,7 +568,7 @@ export const lzstring = {
     }
   },
   /** 编码为 Uint8Array */
-  toUint8Array(data: string): Uint8Array {
+  ToUint8Array(data: string): Uint8Array {
     if (!isString(data)) return new Uint8Array(0);
     try {
       return LZString.compressToUint8Array(data);
@@ -577,7 +577,7 @@ export const lzstring = {
     }
   },
   /** 编码为 UTF16 */
-  toUTF16(data: string): string {
+  ToUTF16(data: string): string {
     if (!isString(data)) return '';
     try {
       return LZString.compressToUTF16(data);
@@ -586,7 +586,7 @@ export const lzstring = {
     }
   },
   /** 从字符串解码 */
-  decode(data: string): string {
+  Decode(data: string): string {
     if (!isString(data)) return '';
     try {
       return LZString.decompress(data) ?? '';
@@ -595,7 +595,7 @@ export const lzstring = {
     }
   },
   /** 从 Base64 解码 */
-  fromBase64(data: string): string {
+  FromBase64(data: string): string {
     if (!isString(data)) return '';
     try {
       return LZString.decompressFromBase64(data) ?? '';
@@ -604,7 +604,7 @@ export const lzstring = {
     }
   },
   /** 从 URIComponent 解码 */
-  fromURIComponent(data: string): string {
+  FromURIComponent(data: string): string {
     if (!isString(data)) return '';
     try {
       return LZString.decompressFromEncodedURIComponent(data) ?? '';
@@ -613,7 +613,7 @@ export const lzstring = {
     }
   },
   /** 从 Uint8Array 解码 */
-  fromUint8Array(data: Uint8Array): string {
+  FromUint8Array(data: Uint8Array): string {
     if (!isUint8Array(data)) return '';
     try {
       return LZString.decompressFromUint8Array(data) ?? '';
@@ -622,7 +622,7 @@ export const lzstring = {
     }
   },
   /** 从 UTF16 解码 */
-  fromUTF16(data: string): string {
+  FromUTF16(data: string): string {
     if (!isString(data)) return '';
     try {
       return LZString.decompressFromUTF16(data) ?? '';
