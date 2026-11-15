@@ -28,4 +28,5 @@ export * from './skill/json';
 export * from './skill/kindof';
 export * from './skill/layout';
 export * from './skill/literal';
+export * from './skill/lzstring';
 export * from './skill/web';
