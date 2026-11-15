@@ -14,6 +14,8 @@ export * from './core/ioc';
 export * from './core/journal';
 // cord
 export * from './cord/action';
+export * from './cord/doubly-linked-list';
+export * from './cord/linked-list';
 export * from './cord/prng';
 export * from './cord/rnd';
 export * from './cord/stack';
