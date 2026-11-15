@@ -17,8 +17,8 @@ class IoC {
   // public
 
   public constructor() {
-    this._knots = new Map();
-    this._appContext = undefined;
+    this.__knots = new Map();
+    this.__appContext = undefined;
   }
 
   /**
@@ -28,13 +28,13 @@ class IoC {
    */
   public register<K extends Knot>(ctor: KnotCtor<K>, options: K['options']) {
     const trait = ctor.prototype.trait;
-    if (this._knots.has(trait)) {
+    if (this.__knots.has(trait)) {
       throw `Knot 已注册 >>> ${trait}`;
     }
 
     const knot = new ctor();
     knot.register(options!);
-    this._knots.set(trait, knot);
+    this.__knots.set(trait, knot);
   }
 
   /**
@@ -44,10 +44,10 @@ class IoC {
    */
   public resolve<K extends Knot>(tin: string | KnotCtor<K>): K {
     const trait = typeof tin === 'string' ? tin : tin.prototype.trait;
-    if (!this._knots.has(trait)) {
+    if (!this.__knots.has(trait)) {
       throw `Knot 未注册 >>> ${trait}`;
     }
-    return this._knots.get(trait) as K;
+    return this.__knots.get(trait) as K;
   }
 
   /**
@@ -56,9 +56,9 @@ class IoC {
    * @param app 应用上下文
    */
   public async attach(app: Record<string, Knot>) {
-    if (!this._appContext) {
-      this._appContext = app;
-      for (const [trait, knot] of this._knots) {
+    if (!this.__appContext) {
+      this.__appContext = app;
+      for (const [trait, knot] of this.__knots) {
         // 挂载依赖
         knot.options.deps?.forEach((dep) => {
           (<any>knot)[dep.prototype.trait] = this.resolve(dep.prototype.trait);
@@ -80,7 +80,7 @@ class IoC {
    * @tip 所有结点的断开入口，一生只有一次
    */
   public async detach() {
-    for (const [trait, knot] of this._knots) {
+    for (const [trait, knot] of this.__knots) {
       // 断开结点
       const [ok, err] = await knot.detach();
       if (ok) {
@@ -88,22 +88,22 @@ class IoC {
         knot.options.deps?.forEach((dep) => {
           delete (<any>knot)[dep.prototype.trait];
         });
-        delete this._appContext![trait];
+        delete this.__appContext![trait];
       }
       if (err) {
         throw err;
       }
     }
 
-    delete this._appContext;
+    delete this.__appContext;
   }
 
   // private
 
   /** 所有结点 */
-  private _knots: Map<string, Knot<KnotOptions>>;
+  private __knots: Map<string, Knot<KnotOptions>>;
   /** 应用上下文 */
-  private _appContext?: Record<string, Knot>;
+  private __appContext?: Record<string, Knot>;
 }
 
 export const ioc = new IoC();

@@ -15,45 +15,44 @@
  * ToArray/迭代为 O(n)。
  */
 export class Stack<T> implements Iterable<T> {
-  /** 内部数组 */
-  private _items: T[] = [];
+  // public
 
   /** 栈的当前大小 */
   public get size(): number {
-    return this._items.length;
+    return this.__items.length;
   }
 
   /** 是否为空 */
   public get isEmpty(): boolean {
-    return this._items.length === 0;
+    return this.__items.length === 0;
   }
 
   /** 读取栈顶元素但不移除 */
   public peek(): T | undefined {
-    return this._items[this._items.length - 1];
+    return this.__items[this.__items.length - 1];
   }
 
   /** 入栈 */
   public push(item: T): this {
-    this._items.push(item);
+    this.__items.push(item);
     return this;
   }
 
   /** 出栈，返回栈顶元素 */
   public pop(): T | undefined {
-    return this._items.pop();
+    return this.__items.pop();
   }
 
   /** 清空栈 */
   public clear(): void {
-    this._items.length = 0;
+    this.__items.length = 0;
   }
 
   /**
    * 以数组形式返回所有元素（从栈顶到栈底的拷贝，修改返回值不会影响栈）
    */
   public toArray(): T[] {
-    return [...this._items].reverse();
+    return [...this.__items].reverse();
   }
 
   /**
@@ -61,7 +60,7 @@ export class Stack<T> implements Iterable<T> {
    * 从栈顶向栈底查找
    */
   public has(item: T): boolean {
-    return this._items.some((v) => v === item);
+    return this.__items.some((v) => v === item);
   }
 
   /**
@@ -71,8 +70,8 @@ export class Stack<T> implements Iterable<T> {
    */
   public find(predicate: (item: T) => boolean): T | undefined {
     // 从栈顶（数组末尾）向下查找
-    for (let i = this._items.length - 1; i >= 0; i--) {
-      const v = this._items[i];
+    for (let i = this.__items.length - 1; i >= 0; i--) {
+      const v = this.__items[i];
       if (predicate(v)) return v;
     }
     return undefined;
@@ -83,7 +82,7 @@ export class Stack<T> implements Iterable<T> {
    * 迭代开始时取快照，遍历期间修改栈不影响本次遍历
    */
   public each(visit: (item: T, index: number) => void): void {
-    const snapshot = [...this._items].reverse();
+    const snapshot = [...this.__items].reverse();
     snapshot.forEach((item, index) => visit(item, index));
   }
 
@@ -96,9 +95,14 @@ export class Stack<T> implements Iterable<T> {
    */
   public *[Symbol.iterator](): IterableIterator<T> {
     // 快照：避免遍历期间的压入/弹出/清空影响本次迭代
-    const snapshot = [...this._items].reverse();
+    const snapshot = [...this.__items].reverse();
     for (let i = 0; i < snapshot.length; i++) {
       yield snapshot[i];
     }
   }
+
+  // private
+
+  /** 内部数组 */
+  private __items: T[] = [];
 }
