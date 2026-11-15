@@ -8,6 +8,8 @@
  * Copyright (c) 2026 archer0423
  *******************************************/
 
+import { Dict } from '../skill/dict';
+
 /**
  * 随机数生产车间
  */
@@ -270,6 +272,82 @@ export class RNG {
     x += Math.cos(rad) * r;
     y += Math.sin(rad) * r;
     return { x, y };
+  }
+
+  /**
+   * 随机权重
+   * 注意：默认权重函数对非对象元素或字段缺失/非法时按 0 计；负权重按 0 计入；
+   * 无任何有效权重时退化为等概率随机
+   * @param arr 目标数组
+   * @param weighted 权重计算函数
+   * @param key 键
+   * @returns 空数组时返回 undefined
+   */
+  public randomWeight<T>(
+    arr: T[],
+    weighted?: (t: T) => number,
+    key: string = 'weight',
+  ): T | undefined {
+    if (arr.length === 0) {
+      return undefined;
+    }
+    // 默认权重函数...
+    weighted ??= (t: T) =>
+      typeof t === 'object' && t !== null ? Number((t as Dict)[key]) || 0 : 0;
+    const weights = arr.map((t) => Math.max(weighted(t), 0));
+    let total = weights.reduce((a, b) => a + b, 0);
+    if (total <= 0) {
+      return arr[this.randomInteger(0, arr.length)];
+    }
+    const rate = this.random() * total;
+    for (let i = 0; i < arr.length; i++) {
+      total -= weights[i];
+      if (total <= rate) {
+        return arr[i];
+      }
+    }
+    return arr[arr.length - 1];
+  }
+
+  /**
+   * 随机打乱列表元素顺序
+   * @param arr 要打乱的列表
+   * @returns 打乱后的列表
+   */
+  public shuffleArray(arr: unknown[]): unknown[] {
+    let pid = -1;
+    const length = arr.length;
+    while (++pid < length) {
+      const nid = this.randomInteger(pid, length);
+      [arr[nid], arr[pid]] = [arr[pid], arr[nid]];
+    }
+    return arr;
+  }
+
+  /**
+   * 从数组中随机抽取 n 个元素，不复制原数组、不修改原数组。
+   *
+   * - n <= 0：返回空数组
+   * - n >= arr.length：返回全部元素的乱序排列
+   * - 否则：基于 Fisher-Yates 部分洗牌，仅交换前 count 次
+   *
+   * @param arr 目标数组
+   * @param n 数量
+   * @returns 被选中元素数组
+   */
+  public randomFromArray<T>(arr: T[], n: number = 1): T[] {
+    const len = arr.length;
+    if (n <= 0 || len === 0 || !Number.isFinite(n)) return [];
+    const count = Math.min(Math.trunc(n), len);
+    if (count <= 0) return [];
+
+    const indices = new Array<number>(len);
+    for (let i = 0; i < len; i++) indices[i] = i;
+    for (let i = 0; i < count; i++) {
+      const j = i + Math.floor(this.random() * (len - i));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    return indices.slice(0, count).map((i) => arr[i]);
   }
 
   // private
