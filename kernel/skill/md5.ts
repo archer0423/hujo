@@ -311,6 +311,6 @@ const ONE_PASS_HASHER = createHasher();
  * @param str - 要计算的字符串
  * @returns MD5 哈希字符串
  */
-export function md5(str: string): string {
+export function MD5(str: string): string {
   return ONE_PASS_HASHER.start().append(str).end() as string;
 }
