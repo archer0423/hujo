@@ -19,6 +19,7 @@ export * from './knot/native';
 // skill
 export * from './skill/base64';
 export * from './skill/color';
+export * from './skill/datetime';
 export * from './skill/dict';
 export * from './skill/digit';
 export * from './skill/env';
