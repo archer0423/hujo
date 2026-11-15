@@ -49,13 +49,13 @@ export class PRNG {
   // public
 
   public constructor() {
-    this._seed = PRNG.NewSeed();
-    this._hash = PRNG.Hash(this._seed);
+    this.__seed = PRNG.NewSeed();
+    this.__hash = PRNG.Hash(this.__seed);
   }
 
   /** 获取随机数种子 */
   public get seed() {
-    return this._seed;
+    return this.__seed;
   }
   /**
    * 设置随机数种子（重设同一种子也会从头重放序列）
@@ -67,12 +67,12 @@ export class PRNG {
       throw new Error(`随机种子不能少于6个字符`);
     }
 
-    if (this._seed === seed) {
+    if (this.__seed === seed) {
       return;
     }
 
-    this._seed = seed;
-    this._hash = PRNG.Hash(this._seed);
+    this.__seed = seed;
+    this.__hash = PRNG.Hash(this.__seed);
   }
 
   /**
@@ -81,14 +81,14 @@ export class PRNG {
    * @returns 0到1之间的随机浮点数
    */
   public random() {
-    this._hash = (this._hash * 9301 + 49297) % 233280;
-    return this._hash / 233280;
+    this.__hash = (this.__hash * 9301 + 49297) % 233280;
+    return this.__hash / 233280;
   }
 
   // private
 
   /** 当前随机数种子 */
-  private _seed: string;
+  private __seed: string;
   /** 当前随机数哈希值 */
-  private _hash: number;
+  private __hash: number;
 }

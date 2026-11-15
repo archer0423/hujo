@@ -17,11 +17,6 @@ export class RNG {
   /** 默认的随机数生产车间 */
   public static readonly M = new RNG();
 
-  // private
-
-  /** 随机数生成器 */
-  private _generator: typeof Math.random;
-
   // public
 
   /**
@@ -29,12 +24,12 @@ export class RNG {
    * @param generator 随机数生成器
    */
   public constructor(generator?: typeof Math.random) {
-    this._generator = generator ?? Math.random;
+    this.__generator = generator ?? Math.random;
   }
 
   /** 获取 [0,1) 随机数 */
   public random(): number {
-    return this._generator();
+    return this.__generator();
   }
 
   /**
@@ -276,4 +271,9 @@ export class RNG {
     y += Math.sin(rad) * r;
     return { x, y };
   }
+
+  // private
+
+  /** 随机数生成器 */
+  private __generator: typeof Math.random;
 }
