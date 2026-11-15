@@ -732,15 +732,15 @@ function Truncate(str: string, length: number, ellipsis: string = '...'): string
   return graphemes.slice(0, length).join('') + ellipsis;
 }
 
-const grapheme = {
-  getLength: GetLength,
-  nextBreak: NextBreak,
-  split: Split,
-  slice: Slice,
-  iterate: Iterate,
-  each: Each,
-  pick: Pick,
-  truncate: Truncate,
+const Grapheme = {
+  GetLength,
+  NextBreak,
+  Split,
+  Slice,
+  Iterate,
+  Each,
+  Pick,
+  Truncate,
 };
 
-export { grapheme };
+export { Grapheme };
