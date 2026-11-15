@@ -9,17 +9,17 @@
  *******************************************/
 
 /** 异步操作函数类型 */
-interface AsyncOperation<P extends unknown[] = [], R = void> {
+export interface AsyncOperation<P extends unknown[] = [], R = void> {
   (...args: P): Promise<R>;
 }
 
 /** 同步操作函数类型 */
-interface SyncOperation<P extends unknown[] = [], R = void> {
+export interface SyncOperation<P extends unknown[] = [], R = void> {
   (...args: P): R;
 }
 
 /** 将任意抛出值归一化为 Error（跨 realm 的 Error 与 DOMException 不满足 instanceof，会被包装为普通 Error） */
-function normalize(err: unknown): Error {
+function normalizeError(err: unknown): Error {
   return err instanceof Error ? err : new Error(String(err));
 }
 
@@ -39,7 +39,7 @@ export function RunSync<P extends unknown[], T = unknown>(
     const result = task.apply(ambient ?? Object.create(null), args);
     return [result, undefined];
   } catch (err) {
-    return [undefined, normalize(err)];
+    return [undefined, normalizeError(err)];
   }
 }
 
@@ -56,6 +56,6 @@ export async function RunAsync<T = unknown>(
     const data = await (typeof task === 'function' ? task() : task);
     return [data, undefined];
   } catch (err) {
-    return [undefined, normalize(err)];
+    return [undefined, normalizeError(err)];
   }
 }
