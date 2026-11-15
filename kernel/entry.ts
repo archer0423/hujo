@@ -16,6 +16,7 @@ export * from './core/journal';
 export * from './cord/action';
 export * from './cord/prng';
 export * from './cord/rnd';
+export * from './cord/xor';
 // knot
 export * from './knot/native';
 // skill
