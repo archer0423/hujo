@@ -336,3 +336,19 @@ export function DeepClone(d: unknown): unknown {
 
   return Mapping(d, (_, v) => DeepClone(v));
 }
+
+/**
+ * 根据给定字典的键值进行分组
+ * @param arr 目标数组
+ * @param key 键
+ * @returns 无原型的新字典
+ */
+export function GroupBy(arr: Dict[], key: string): Dict {
+  return arr.reduce(
+    (a, v) => {
+      (a[v[key]] ||= []).push(v);
+      return a;
+    },
+    Object.create(null) as Dict,
+  );
+}
