@@ -106,4 +106,5 @@ class IoC {
   private __appContext?: Record<string, Knot>;
 }
 
+/** 依赖容器的唯一实例 */
 export const ioc = new IoC();
