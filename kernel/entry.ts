@@ -21,6 +21,7 @@ export * from './cord/pairs';
 export * from './cord/prng';
 export * from './cord/rnd';
 export * from './cord/stack';
+export * from './cord/trigger';
 export * from './cord/xor';
 // knot
 export * from './knot/native';
