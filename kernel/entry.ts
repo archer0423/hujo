@@ -16,6 +16,7 @@ export * from './core/journal';
 export * from './cord/action';
 export * from './cord/doubly-linked-list';
 export * from './cord/linked-list';
+export * from './cord/lru';
 export * from './cord/prng';
 export * from './cord/rnd';
 export * from './cord/stack';
