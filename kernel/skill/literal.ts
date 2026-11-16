@@ -158,3 +158,18 @@ export function PadEnd(str: string, targetLength: number, padString: string) {
 export function GetCharCount(str: string) {
   return Array.from(str).length;
 }
+
+/**
+ * FNV-1a 非加密哈希算法
+ * @tip 适合用于哈希表、缓存键、校验和、URL/文件名/IP地址等相似字符串的快速散列与分桶
+ * @param text 输入字符串
+ * @returns 哈希后的字符串
+ */
+export function HashFNV1a(text: string) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(16).padStart(8, '0');
+}
