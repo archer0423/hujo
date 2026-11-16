@@ -41,4 +41,5 @@ export * from './skill/literal';
 export * from './skill/lzstring';
 export * from './skill/md5';
 export * from './skill/might';
+export * from './skill/regexp';
 export * from './skill/web';
