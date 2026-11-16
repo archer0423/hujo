@@ -63,18 +63,36 @@ export function SignOf(d: number): number {
   return d === 0 || Number.isNaN(d) ? 0 : d < 0 ? -1 : 1;
 }
 
+/**
+ * 获得数组中的最大值
+ * @param arr 数组
+ * @returns 最大值（空数组返回 -Infinity）
+ */
+export function MaxOf(arr: number[]): number {
+  return arr.reduce((a, b) => Math.max(a, b), -Infinity);
+}
+
+/**
+ * 获得数组中的最小值
+ * @param arr 数组
+ * @returns 最小值（空数组返回 Infinity）
+ */
+export function MinOf(arr: number[]): number {
+  return arr.reduce((a, b) => Math.min(a, b), Infinity);
+}
+
 /** 计算数字的和 */
-export function SumOf(...arr: number[]): number {
+export function SumOf(arr: number[]): number {
   return arr.reduce((acc, cur) => acc + cur, 0);
 }
 
 /** 计算数字的平均值（空集合返回 0） */
-export function AverageOf(...arr: number[]): number {
+export function AverageOf(arr: number[]): number {
   return arr.length === 0 ? 0 : arr.reduce((acc, cur) => acc + cur, 0) / arr.length;
 }
 
 /** 计算数字的乘积 */
-export function ProductOf(...arr: number[]): number {
+export function ProductOf(arr: number[]): number {
   return arr.reduce((acc, cur) => acc * cur, 1);
 }
 
