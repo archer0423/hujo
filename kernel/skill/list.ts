@@ -216,18 +216,18 @@ export function PickValues(
  * 删除指定数量的元素
  * @param arr 数组
  * @param count 数量
- * @param after 删除回调
+ * @param before 删除回调
  */
 export function RemoveBatch(
   arr: unknown[],
   count: number,
-  after?: (item: unknown) => unknown,
+  before?: (item: unknown) => unknown,
 ): void {
   for (let i = arr.length - 1; i >= 0; i--) {
     if (--count < 0) {
       break;
     }
-    after?.(arr[i]);
+    before?.(arr[i]);
     arr.splice(i, 1);
   }
 }
@@ -267,7 +267,10 @@ export function RemoveIf<ItemType>(
   if (l == 0) return;
   reverse ??= false;
   if (reverse) {
-    for (let i = l - 1; i >= 0; i--) if (match(arr[i], i, arr) === true) arr.splice(i, 1);
+    for (let i = l - 1; i >= 0; i--)
+      if (match(arr[i], i, arr) === true) {
+        arr.splice(i, 1);
+      }
   } else {
     for (let i = 0; i < l; i++)
       if (match(arr[i], i, arr) === true) {
