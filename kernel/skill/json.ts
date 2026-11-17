@@ -8,7 +8,7 @@
  * Copyright (c) 2026 archer0423
  *******************************************/
 
-import { journal } from '../entry';
+import { journal } from '../core/journal';
 
 /**
  * 将数据编码为 JSON 字符串

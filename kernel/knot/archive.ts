@@ -10,8 +10,8 @@
 
 import { sys } from 'cc';
 
+import { journal } from '../core/journal';
 import { Knot, KnotApi, KnotOptions } from '../core/knot';
-import { journal } from '../entry';
 
 /** 存储值类型（只允许布尔值/数值/字符串） */
 export type ArchiveItemValue = boolean | number | string;

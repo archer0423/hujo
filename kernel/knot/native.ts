@@ -10,7 +10,7 @@
 
 import { native, sys } from 'cc';
 
-import { Knot, KnotApi, KnotOptions } from '../entry';
+import { Knot, KnotApi, KnotOptions } from '../core/knot';
 
 /** 原生事件监听器 */
 export type NativeEventListener = (data?: NativeRawData) => void;

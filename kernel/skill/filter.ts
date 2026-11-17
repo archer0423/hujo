@@ -10,7 +10,7 @@
 
 import { builtinResMgr, instantiate, Material, Node, UIRenderer } from 'cc';
 
-import { journal } from '../entry';
+import { journal } from '../core/journal';
 
 /** 材质属性值（覆盖常用标量、向量、数组等 setProperty 可接受的类型） */
 export type MaterialPropertyValue = unknown;

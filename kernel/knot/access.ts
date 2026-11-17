@@ -8,7 +8,8 @@
  * Copyright (c) 2026 archer0423
  *******************************************/
 
-import { EachProperties, Knot, KnotApi, KnotOptions } from '../entry';
+import { Knot, KnotApi, KnotOptions } from '../core/knot';
+import { EachProperties } from '../skill/dict';
 
 /** 访问键 */
 export type AccessKey = string | symbol;

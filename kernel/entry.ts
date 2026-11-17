@@ -8,6 +8,7 @@
  * Copyright (c) 2026 archer0423
  *******************************************/
 
+/** 
 // core
 export * from './core/knot';
 export * from './core/ioc';
@@ -46,3 +47,4 @@ export * from './skill/md5';
 export * from './skill/might';
 export * from './skill/regexp';
 export * from './skill/web';
+ */
