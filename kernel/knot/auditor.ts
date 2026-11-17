@@ -40,7 +40,7 @@ export interface AuditorOptions extends KnotOptions {
 }
 
 /** 匹配位置信息 */
-export interface IAuditorMatchPosition {
+export interface AuditorMatchPosition {
   /** 匹配到的敏感词 */
   Word: string;
   /**
@@ -56,21 +56,21 @@ export interface IAuditorMatchPosition {
 }
 
 /** 匹配结果 */
-export interface IAuditorMatchResult {
+export interface AuditorMatchResult {
   /** 是否匹配到敏感词 */
   Matched: boolean;
   /** 匹配到的敏感词列表（去重，按首次出现顺序） */
   Words: string[];
   /** 所有匹配位置信息 */
-  Matches: IAuditorMatchPosition[];
+  Matches: AuditorMatchPosition[];
 }
 
 /** AC 自动机节点接口 */
-export interface IACNode {
+export interface ACNode {
   /** 子节点映射 */
-  Children: Map<string, IACNode>;
+  Children: Map<string, ACNode>;
   /** 失败指针 */
-  Fail: IACNode | null;
+  Fail: ACNode | null;
   /** 该节点自身的完整敏感词（词尾节点非空） */
   Words: string[];
   /** 匹配输出（自身词 + fail 链词，构建时由 words 重新生成） */
@@ -78,7 +78,7 @@ export interface IACNode {
 }
 
 /** AC 自动机匹配结果（与外部匹配位置结构一致，复用同一形状避免重复定义） */
-export type IACMatchResult = IAuditorMatchPosition;
+export type ACMatchResult = AuditorMatchPosition;
 
 /** 敏感词审计员结点接口 */
 export interface AuditorApi extends KnotApi<AuditorOptions> {
@@ -93,7 +93,7 @@ export interface AuditorApi extends KnotApi<AuditorOptions> {
    * @param text 待查找的文本
    * @returns 匹配结果（匹配位置为码点索引）
    */
-  find(text: string): IAuditorMatchResult;
+  find(text: string): AuditorMatchResult;
   /**
    * 替换文本中的敏感词
    *
@@ -206,7 +206,7 @@ class ACAutomaton {
       return;
     }
 
-    const queue: IACNode[] = [];
+    const queue: ACNode[] = [];
 
     // 第一层节点的 fail 指针指向 root
     for (const child of this.__root.Children.values()) {
@@ -244,12 +244,12 @@ class ACAutomaton {
    * @param text 待匹配的文本
    * @returns 匹配结果列表
    */
-  public match(text: string): IACMatchResult[] {
+  public match(text: string): ACMatchResult[] {
     if (!this.__built) {
       this.build();
     }
 
-    const results: IACMatchResult[] = [];
+    const results: ACMatchResult[] = [];
     let current = this.__root;
     const chars = Array.from(this.__normalize(text)); // 归一后分词(逐码点等长,位置索引不变)
 
@@ -398,7 +398,7 @@ class ACAutomaton {
   // private
 
   /** 自动机根节点 */
-  private __root: IACNode;
+  private __root: ACNode;
   /** 是否已构建 */
   private __built: boolean;
   /** 干扰词容器 */
@@ -457,7 +457,7 @@ export class Auditor extends Knot<AuditorOptions> implements AuditorApi {
     return result;
   }
 
-  public find(text: string): IAuditorMatchResult {
+  public find(text: string): AuditorMatchResult {
     if (!text || text.length === 0) {
       return { Matched: false, Words: [], Matches: [] };
     }
@@ -484,7 +484,7 @@ export class Auditor extends Knot<AuditorOptions> implements AuditorApi {
       wordSet.add(match.Word);
     }
 
-    const result: IAuditorMatchResult = {
+    const result: AuditorMatchResult = {
       Matched: matches.length > 0,
       Words: Array.from(wordSet),
       Matches: matches,
@@ -652,7 +652,7 @@ export class Auditor extends Knot<AuditorOptions> implements AuditorApi {
   /** 测试缓存 */
   private __testCache!: LRU<string, boolean> | null;
   /** 查找缓存 */
-  private __findCache!: LRU<string, IAuditorMatchResult> | null;
+  private __findCache!: LRU<string, AuditorMatchResult> | null;
   /** 替换缓存 */
   private __replaceCache!: LRU<string, string> | null;
   /** 敏感词容器 */
