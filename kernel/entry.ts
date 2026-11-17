@@ -33,6 +33,7 @@ export * from './knot/i18n';
 export * from './knot/native';
 export * from './knot/spider';
 export * from './knot/tabular';
+export * from './knot/timer';
 // skill
 export * from './skill/base64';
 export * from './skill/color';
