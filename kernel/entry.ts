@@ -25,6 +25,7 @@ export * from './cord/trigger';
 export * from './cord/xor';
 // knot
 export * from './knot/access';
+export * from './knot/archive';
 export * from './knot/native';
 // skill
 export * from './skill/base64';
