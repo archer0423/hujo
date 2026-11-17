@@ -29,6 +29,7 @@ export * from './knot/access';
 export * from './knot/archive';
 export * from './knot/auditor';
 export * from './knot/event-bus';
+export * from './knot/i18n';
 export * from './knot/native';
 // skill
 export * from './skill/base64';
