@@ -17,7 +17,7 @@ export interface TimeDebounced {
   /** 触发防抖（参数透传给句柄） */
   (...args: unknown[]): void;
   /** 取消滞留的防抖调用（已排期的回调不再执行） */
-  Cancel(): void;
+  cancel(): void;
 }
 
 /** 节流句柄 */
@@ -419,7 +419,7 @@ export function Debounce(
       timer = 0;
     }, delay) as ReturnType<typeof setTimeout>;
   };
-  debounced.Cancel = () => {
+  debounced.cancel = () => {
     if (timer) clearTimeout(timer);
     timer = 0;
   };

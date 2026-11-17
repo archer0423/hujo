@@ -42,39 +42,39 @@ export interface AuditorOptions extends KnotOptions {
 /** 匹配位置信息 */
 export interface AuditorMatchPosition {
   /** 匹配到的敏感词 */
-  Word: string;
+  word: string;
   /**
    * 起始位置（**码点索引**，`Array.from` 语义）
    * @tip 非 UTF-16 下标：文本含 emoji 等代理对时，直接 `str.slice(Start, End)` 会切错位置
    */
-  Start: number;
+  start: number;
   /**
    * 结束位置（码点索引，不包含）
    * @tip 同上，切分须按码点进行（如 `Array.from(str).slice(Start, End)`）
    */
-  End: number;
+  end: number;
 }
 
 /** 匹配结果 */
 export interface AuditorMatchResult {
   /** 是否匹配到敏感词 */
-  Matched: boolean;
+  matched: boolean;
   /** 匹配到的敏感词列表（去重，按首次出现顺序） */
-  Words: string[];
+  words: string[];
   /** 所有匹配位置信息 */
-  Matches: AuditorMatchPosition[];
+  matches: AuditorMatchPosition[];
 }
 
 /** AC 自动机节点接口 */
 export interface ACNode {
   /** 子节点映射 */
-  Children: Map<string, ACNode>;
+  children: Map<string, ACNode>;
   /** 失败指针 */
-  Fail: ACNode | null;
+  fail: ACNode | null;
   /** 该节点自身的完整敏感词（词尾节点非空） */
-  Words: string[];
+  words: string[];
   /** 匹配输出（自身词 + fail 链词，构建时由 words 重新生成） */
-  Output: string[];
+  output: string[];
 }
 
 /** AC 自动机匹配结果（与外部匹配位置结构一致，复用同一形状避免重复定义） */
@@ -152,10 +152,10 @@ class ACAutomaton {
    */
   public constructor(ignoreCase = false) {
     this.__root = {
-      Children: new Map(),
-      Fail: null,
-      Words: [],
-      Output: [],
+      children: new Map(),
+      fail: null,
+      words: [],
+      output: [],
     };
     this.__built = false;
     this.__interferenceWords = new Set();
@@ -176,23 +176,23 @@ class ACAutomaton {
     const chars = Array.from(this.__normalize(word)); // 归一后分词(IgnoreCase 关闭时原样返回)
 
     for (const char of chars) {
-      let child = current.Children.get(char);
+      let child = current.children.get(char);
       if (!child) {
         child = {
-          Children: new Map(),
-          Fail: null,
-          Words: [],
-          Output: [],
+          children: new Map(),
+          fail: null,
+          words: [],
+          output: [],
         };
-        current.Children.set(char, child);
+        current.children.set(char, child);
       }
       current = child;
     }
 
     // 归一后同一路径只保留首词：IgnoreCase 下 "abc"/"ABC" 共享路径，
     // 变体重复入表会让 Match 对同一区间输出多条重复结果（下游命中计数虚高）
-    if (current.Words.length === 0) {
-      current.Words.push(word);
+    if (current.words.length === 0) {
+      current.words.push(word);
       this.__wordChars.set(word, chars);
       this.__built = false; // 标记需要重新构建 fail 指针
     }
@@ -209,9 +209,9 @@ class ACAutomaton {
     const queue: ACNode[] = [];
 
     // 第一层节点的 fail 指针指向 root
-    for (const child of this.__root.Children.values()) {
-      child.Fail = this.__root;
-      child.Output = [...child.Words]; // 由自身词重新生成（fail 为 root，无合并项）
+    for (const child of this.__root.children.values()) {
+      child.fail = this.__root;
+      child.output = [...child.words]; // 由自身词重新生成（fail 为 root，无合并项）
       queue.push(child);
     }
 
@@ -220,19 +220,19 @@ class ACAutomaton {
     while (head < queue.length) {
       const current = queue[head++];
 
-      for (const [char, child] of current.Children) {
+      for (const [char, child] of current.children) {
         queue.push(child);
 
         // 查找 fail 指针
-        let fail = current.Fail;
-        while (fail && !fail.Children.has(char)) {
-          fail = fail.Fail;
+        let fail = current.fail;
+        while (fail && !fail.children.has(char)) {
+          fail = fail.fail;
         }
 
-        child.Fail = fail ? fail.Children.get(char) || this.__root : this.__root;
+        child.fail = fail ? fail.children.get(char) || this.__root : this.__root;
 
         // 合并 output：由自身词重新生成（幂等，重复构建不再累积；fail 节点层级更浅、已先构建完成）
-        child.Output = [...child.Words, ...child.Fail.Output];
+        child.output = [...child.words, ...child.fail.output];
       }
     }
 
@@ -263,15 +263,15 @@ class ACAutomaton {
       }
 
       // 沿着 fail 指针查找匹配的子节点
-      while (current !== this.__root && !current.Children.has(char)) {
-        current = current.Fail!;
+      while (current !== this.__root && !current.children.has(char)) {
+        current = current.fail!;
       }
 
-      if (current.Children.has(char)) {
-        current = current.Children.get(char)!;
+      if (current.children.has(char)) {
+        current = current.children.get(char)!;
 
         // 输出所有匹配的敏感词
-        for (const word of current.Output) {
+        for (const word of current.output) {
           // 计算在原始文本中的起始位置（跳过干扰字符）
           let j = i;
           // 从当前位置向前查找匹配的起始位置（AddWord 已缓存归一后的码点数组）
@@ -297,9 +297,9 @@ class ACAutomaton {
           }
 
           results.push({
-            Word: word,
-            Start: j + 1,
-            End: i + 1,
+            word: word,
+            start: j + 1,
+            end: i + 1,
           });
         }
       }
@@ -329,14 +329,14 @@ class ACAutomaton {
         continue;
       }
 
-      while (current !== this.__root && !current.Children.has(char)) {
-        current = current.Fail!;
+      while (current !== this.__root && !current.children.has(char)) {
+        current = current.fail!;
       }
 
-      if (current.Children.has(char)) {
-        current = current.Children.get(char)!;
+      if (current.children.has(char)) {
+        current = current.children.get(char)!;
 
-        if (current.Output.length > 0) {
+        if (current.output.length > 0) {
           return true;
         }
       }
@@ -350,10 +350,10 @@ class ACAutomaton {
    */
   public clear(): void {
     this.__root = {
-      Children: new Map(),
-      Fail: null,
-      Words: [],
-      Output: [],
+      children: new Map(),
+      fail: null,
+      words: [],
+      output: [],
     };
     this.__wordChars.clear();
     this.__built = false;
@@ -459,7 +459,7 @@ export class Auditor extends Knot<AuditorOptions> implements AuditorApi {
 
   public find(text: string): AuditorMatchResult {
     if (!text || text.length === 0) {
-      return { Matched: false, Words: [], Matches: [] };
+      return { matched: false, words: [], matches: [] };
     }
 
     // 检查缓存
@@ -468,9 +468,9 @@ export class Auditor extends Knot<AuditorOptions> implements AuditorApi {
       if (cached !== null) {
         // 返回浅拷贝，防止外部修改影响缓存
         return {
-          Matched: cached.Matched,
-          Words: [...cached.Words],
-          Matches: cached.Matches.map((m) => ({ ...m })),
+          matched: cached.matched,
+          words: [...cached.words],
+          matches: cached.matches.map((m) => ({ ...m })),
         };
       }
     }
@@ -481,21 +481,21 @@ export class Auditor extends Knot<AuditorOptions> implements AuditorApi {
     // 去重敏感词
     const wordSet = new Set<string>();
     for (const match of matches) {
-      wordSet.add(match.Word);
+      wordSet.add(match.word);
     }
 
     const result: AuditorMatchResult = {
-      Matched: matches.length > 0,
-      Words: Array.from(wordSet),
-      Matches: matches,
+      matched: matches.length > 0,
+      words: Array.from(wordSet),
+      matches: matches,
     };
 
     // 更新缓存（存储副本，防止后续修改影响缓存）
     if (this.__findCache) {
       this.__findCache.set(text, {
-        Matched: result.Matched,
-        Words: [...result.Words],
-        Matches: result.Matches.map((m) => ({ ...m })),
+        matched: result.matched,
+        words: [...result.words],
+        matches: result.matches.map((m) => ({ ...m })),
       });
     }
 
@@ -517,7 +517,7 @@ export class Auditor extends Knot<AuditorOptions> implements AuditorApi {
     }
 
     const result = this.find(text);
-    if (!result.Matched) {
+    if (!result.matched) {
       // 干净文本是最高频流量，同样入缓存（组合键已防碰撞），避免反复全量匹配
       this.__replaceCache?.set(cacheKey, text);
       return text;
@@ -528,14 +528,14 @@ export class Auditor extends Knot<AuditorOptions> implements AuditorApi {
     const chars = Array.from(text);
 
     // 合并重叠区间：重叠匹配若逐个替换，从后向前切片会互相错位（吞字或残留敏感片段）
-    const sorted = [...result.Matches].sort((a, b) => a.Start - b.Start);
+    const sorted = [...result.matches].sort((a, b) => a.start - b.start);
     const ranges: Array<{ start: number; end: number }> = [];
     for (const match of sorted) {
       const last = ranges[ranges.length - 1];
-      if (last && match.Start < last.end) {
-        last.end = Math.max(last.end, match.End); // 重叠：并入上一区间
+      if (last && match.start < last.end) {
+        last.end = Math.max(last.end, match.end); // 重叠：并入上一区间
       } else {
-        ranges.push({ start: match.Start, end: match.End });
+        ranges.push({ start: match.start, end: match.end });
       }
     }
 

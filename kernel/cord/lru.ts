@@ -12,10 +12,10 @@
  * LRU 缓存节点
  */
 export interface LRUNode<K, V> {
-  Key: K;
-  Value: V;
-  Prev: LRUNode<K, V> | null;
-  Next: LRUNode<K, V> | null;
+  key: K;
+  value: V;
+  prev: LRUNode<K, V> | null;
+  next: LRUNode<K, V> | null;
 }
 
 /**
@@ -49,7 +49,7 @@ export class LRU<K, V> {
 
     // 移动到头部（标记为最近使用）
     this.__moveToHead(node);
-    return node.Value;
+    return node.value;
   }
 
   /**
@@ -58,7 +58,7 @@ export class LRU<K, V> {
    */
   public peek(key: K): V | null {
     const node = this.__cache.get(key);
-    return node ? node.Value : null;
+    return node ? node.value : null;
   }
 
   /**
@@ -69,7 +69,7 @@ export class LRU<K, V> {
     const node = this.__cache.get(key);
     if (node) {
       this.__moveToHead(node);
-      return node.Value;
+      return node.value;
     }
 
     const value = creator(key);
@@ -85,17 +85,17 @@ export class LRU<K, V> {
 
     if (existing) {
       // 更新现有节点
-      existing.Value = value;
+      existing.value = value;
       this.__moveToHead(existing);
       return;
     }
 
     // 创建新节点
     const node: LRUNode<K, V> = {
-      Key: key,
-      Value: value,
-      Prev: null,
-      Next: null,
+      key: key,
+      value: value,
+      prev: null,
+      next: null,
     };
 
     // 添加到缓存
@@ -159,8 +159,8 @@ export class LRU<K, V> {
     const result: K[] = [];
     let node = this.__head;
     while (node) {
-      result.push(node.Key);
-      node = node.Next;
+      result.push(node.key);
+      node = node.next;
     }
     return result;
   }
@@ -172,8 +172,8 @@ export class LRU<K, V> {
     const result: V[] = [];
     let node = this.__head;
     while (node) {
-      result.push(node.Value);
-      node = node.Next;
+      result.push(node.value);
+      node = node.next;
     }
     return result;
   }
@@ -188,12 +188,12 @@ export class LRU<K, V> {
     let node = this.__head;
     while (node) {
       snapshot.push(node);
-      node = node.Next;
+      node = node.next;
     }
     for (const item of snapshot) {
       // 节点身份校验：Set 更新已有键不会更换节点，仍会回调；Delete 后重设的同键新节点则跳过
-      if (this.__cache.get(item.Key) === item) {
-        callback(item.Value, item.Key);
+      if (this.__cache.get(item.key) === item) {
+        callback(item.value, item.key);
       }
     }
   }
@@ -213,11 +213,11 @@ export class LRU<K, V> {
    * 添加节点到头部
    */
   private __addToHead(node: LRUNode<K, V>): void {
-    node.Prev = null;
-    node.Next = this.__head;
+    node.prev = null;
+    node.next = this.__head;
 
     if (this.__head) {
-      this.__head.Prev = node;
+      this.__head.prev = node;
     }
 
     this.__head = node;
@@ -242,16 +242,16 @@ export class LRU<K, V> {
    * 移除节点
    */
   private __removeNode(node: LRUNode<K, V>): void {
-    if (node.Prev) {
-      node.Prev.Next = node.Next;
+    if (node.prev) {
+      node.prev.next = node.next;
     } else {
-      this.__head = node.Next;
+      this.__head = node.next;
     }
 
-    if (node.Next) {
-      node.Next.Prev = node.Prev;
+    if (node.next) {
+      node.next.prev = node.prev;
     } else {
-      this.__tail = node.Prev;
+      this.__tail = node.prev;
     }
   }
 
@@ -263,7 +263,7 @@ export class LRU<K, V> {
       return;
     }
 
-    this.__cache.delete(this.__tail.Key);
+    this.__cache.delete(this.__tail.key);
     this.__removeNode(this.__tail);
   }
 }
