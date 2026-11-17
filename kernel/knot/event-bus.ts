@@ -267,7 +267,15 @@ export class EventChannel {
    *      once 监听器执行后立即移除（嵌套通报不会重复执行）
    * @param message - 数据（不可为空）
    */
-  public notify(msg: EventBusPacket): void {
+  public notify(msg: EventBusPacket | string, payload?: EventBusPacket['payload']): void {
+    if (typeof msg === 'string') {
+      if (typeof payload === 'undefined') {
+        msg = EventMessage.NoPayload(msg);
+      } else {
+        msg = EventMessage.WithPayload(msg, payload);
+      }
+    }
+
     if (msg === null || msg === undefined) {
       this.__logger.error('<EventChannel> 通报失败：消息不可为空');
       return;
@@ -350,7 +358,7 @@ export class EventBus extends Knot<EventBusOptions> implements EventBusApi {
   // public
 
   public get trait(): string {
-    return 'event-bus';
+    return 'event';
   }
 
   public constructor() {
