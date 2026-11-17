@@ -24,7 +24,7 @@ export interface KnotCtor<K extends Knot> {
 
 /** 结点接口 */
 export interface KnotApi<P extends KnotOptions> {
-  /** 选项 */
+  /** 选项（在连接完成后转换为不可变对象） */
   options: Readonly<P>;
   /** 标识 */
   readonly trait: string;
@@ -53,7 +53,7 @@ export abstract class Knot<P extends KnotOptions = {}> implements KnotApi<P> {
 
   public abstract get trait(): string;
 
-  public options!: Readonly<P>;
+  public options!: P;
 
   public get logger() {
     return journal.acquire(this.trait);
@@ -68,7 +68,7 @@ export abstract class Knot<P extends KnotOptions = {}> implements KnotApi<P> {
   }
 
   public register(options: P): void {
-    this.options = Object.freeze(options);
+    this.options = options;
   }
 
   public async attach(): ActionResult {
@@ -78,6 +78,10 @@ export abstract class Knot<P extends KnotOptions = {}> implements KnotApi<P> {
 
     this.__actionAttach = new Action(this._attach.bind(this));
     await this.__actionAttach.play();
+
+    // 定型
+    this.options = Object.freeze(this.options);
+
     return this.__actionAttach.result!;
   }
 
