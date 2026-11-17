@@ -12,22 +12,6 @@ import { journal } from '../core/journal';
 import { Knot, KnotApi, KnotOptions } from '../core/knot';
 import { DeepFreeze } from '../skill/dict';
 
-/** 域解析器 */
-export interface TabularFieldParser<T = unknown> {
-  (input: string, ...args: unknown[]): T;
-}
-
-/** 数值对 */
-export interface TabularCountPair {
-  /** 编号 */
-  id: number;
-  /** 数值 */
-  value: number;
-}
-
-/** 数值对数组 */
-export type TabularCountPairs = TabularCountPair[];
-
 /**
  * 表结构（列表|字典）
  * @tip List 按列表解析，表数据不包含字段，每一行有且只有一条数据
@@ -42,7 +26,7 @@ export interface TabularSheet {
   /** 类型 */
   type: TabularType;
   /** 字段解析器 */
-  parser: Record<string, TabularFieldParser>;
+  parser: Record<string, FieldParser>;
   /** 数据 */
   content: unknown;
   /** 数据解析器 */
@@ -71,6 +55,22 @@ export interface TabularApi extends KnotApi<TabularOptions> {
 }
 
 // parsers
+
+/** 域解析器 */
+export interface FieldParser<T = unknown> {
+  (input: string, ...args: unknown[]): T;
+}
+
+/** 数值对 */
+export interface CountPair {
+  /** 编号 */
+  id: number;
+  /** 数值 */
+  value: number;
+}
+
+/** 数值对数组 */
+export type CountPairs = CountPair[];
 
 /**
  * 布尔解析器
@@ -125,7 +125,7 @@ export function StringParser(input: string) {
  */
 export function ArrayParser<T>(
   input: string,
-  fieldParser: TabularFieldParser<T>,
+  fieldParser: FieldParser<T>,
   separator: string = '-',
 ) {
   return input
@@ -145,8 +145,8 @@ export function ArrayParser<T>(
  */
 export function PairParser<A, B>(
   input: string,
-  aParser: TabularFieldParser<A>,
-  bParser: TabularFieldParser<B>,
+  aParser: FieldParser<A>,
+  bParser: FieldParser<B>,
   separator: string = '-',
 ): [A, B] {
   const [a = '', b = ''] = input.split(separator);
@@ -159,7 +159,7 @@ export function PairParser<A, B>(
  * @param [separator='-'] 分隔符
  * @returns 数值对
  */
-export function CountPairParser(input: string, separator: string = '-'): TabularCountPair {
+export function CountPairParser(input: string, separator: string = '-'): CountPair {
   const [ID, Value] = PairParser(input, IntegerParser, IntegerParser, separator);
   return { id: ID, value: Value };
 }
@@ -175,7 +175,7 @@ export function CountPairsParser(
   input: string,
   itemSeparator: string = '-',
   pairSeparator: string = ':',
-): TabularCountPairs {
+): CountPairs {
   return ArrayParser(
     input,
     function (i: string) {
@@ -196,7 +196,7 @@ export function CountPairsParser(
  */
 export function DictParser<T>(
   input: string,
-  filedParser: TabularFieldParser<T>,
+  filedParser: FieldParser<T>,
   itemSeparator: string = '-',
   kvSeparator: string = ':',
 ): Record<string, T> {
@@ -211,10 +211,7 @@ export function DictParser<T>(
   return output;
 }
 
-/** 行分隔符 */
-const ROW_SEPARATOR = '\n';
-/** 列分隔符 */
-const COL_SEPARATOR = '\t';
+// sheet
 
 /**
  * 从容器取值，不存在时创建并写回
@@ -246,20 +243,24 @@ function hasOwnParser(sheet: TabularSheet, field: string): boolean {
 /**
  * 解析配置表
  * @tip 原始内容非字符串时须提供 ContentParser 完成转换
- * @tip 行以 \n 分隔，列以 \t 分隔（Excel 复制格式），空行自动忽略
+ * @tip 行以 \n 分隔，列以 , 分隔（Excel 复制格式），空行自动忽略
  * @tip 列表每行一条数据，仅使用首个字段解析器；字典第1行为备注，第2行为字段，以#开头的字段不导出
  * @param sheet 配置表
  * @param logger 日志
  * @returns 解析后的只读数据
  */
-function parseSheet(sheet: TabularSheet): unknown[] {
+function parseSheet(
+  sheet: TabularSheet,
+  rowSeperator: string = '\n',
+  colSeparator: string = ',',
+): unknown[] {
   const raw = sheet.contentParser ? sheet.contentParser(sheet.content) : sheet.content;
   if (typeof raw !== 'string') {
     throw new Error(`配置表数据错误 >>> ${sheet.name}`);
   }
 
   const lines = raw
-    .split(ROW_SEPARATOR)
+    .split(rowSeperator)
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
 
@@ -281,14 +282,14 @@ function parseSheet(sheet: TabularSheet): unknown[] {
     throw new Error(`配置表缺少字段行 >>> ${sheet.name}`);
   }
 
-  const fields = lines[1].split(COL_SEPARATOR);
+  const fields = lines[1].split(colSeparator);
   const missing = fields.filter((field) => !hasOwnParser(sheet, field));
   if (missing.length > 0) {
     logger.warn(`字段缺少解析器，将按原样保留字符串 >>> ${sheet.name}::${missing.join(', ')}`);
   }
 
   return lines.slice(2).map((line) => {
-    const cells = line.split(COL_SEPARATOR);
+    const cells = line.split(colSeparator);
     const row: Record<string, unknown> = {};
     fields.forEach((field, index) => {
       const parser = hasOwnParser(sheet, field) ? sheet.parser[field] : undefined;
