@@ -135,7 +135,7 @@ export class DoublyLinkedList<T> {
    * @tip 节点须属于本链表且未被移除，否则返回 null 且链表不受影响
    */
   public insertAfter(node: DoublyLinkedListNode<T>, value: T): DoublyLinkedListNode<T> | null {
-    if (this.checkOwnership && !this.owns(node)) return null;
+    if (this.checkOwnership && !this.__owns(node)) return null;
     const newNode = new DoublyLinkedListNode(value);
     newNode.prev = node;
     newNode.next = node.next;
@@ -156,7 +156,7 @@ export class DoublyLinkedList<T> {
    * @tip 节点须属于本链表且未被移除，否则返回 null 且链表不受影响
    */
   public insertBefore(node: DoublyLinkedListNode<T>, value: T): DoublyLinkedListNode<T> | null {
-    if (this.checkOwnership && !this.owns(node)) return null;
+    if (this.checkOwnership && !this.__owns(node)) return null;
     const newNode = new DoublyLinkedListNode(value);
     newNode.next = node;
     newNode.prev = node.prev;
@@ -172,23 +172,13 @@ export class DoublyLinkedList<T> {
     return newNode;
   }
 
-  /** 节点是否仍在链上（归属校验，O(n)） */
-  private owns(node: DoublyLinkedListNode<T>): boolean {
-    let current: DoublyLinkedListNode<T> | null = this.__head;
-    while (current) {
-      if (current === node) return true;
-      current = current.next;
-    }
-    return false;
-  }
-
   /**
    * 删除任意节点，返回是否成功
    * @tip 节点须属于本链表且未被移除，否则返回 false 且链表不受影响
    */
   public remove(node: DoublyLinkedListNode<T>): boolean {
     // 归属校验：拦截来自其他链表或已被移除的节点，避免静默改写指针、错记 size
-    if (!node || (this.checkOwnership && !this.owns(node))) return false;
+    if (!node || (this.checkOwnership && !this.__owns(node))) return false;
 
     if (node.prev) {
       node.prev.next = node.next;
@@ -258,4 +248,14 @@ export class DoublyLinkedList<T> {
   private __head: DoublyLinkedListNode<T> | null = null;
   private __tail: DoublyLinkedListNode<T> | null = null;
   private __size = 0;
+
+  /** 节点是否仍在链上（归属校验，O(n)） */
+  private __owns(node: DoublyLinkedListNode<T>): boolean {
+    let current: DoublyLinkedListNode<T> | null = this.__head;
+    while (current) {
+      if (current === node) return true;
+      current = current.next;
+    }
+    return false;
+  }
 }
