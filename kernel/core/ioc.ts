@@ -60,8 +60,8 @@ class IoC {
       this.__appContext = app;
       for (const [trait, knot] of this.__knots) {
         // 挂载依赖
-        knot.options.deps?.forEach((dep) => {
-          (<any>knot)[dep.prototype.trait] = this.resolve(dep.prototype.trait);
+        knot.deps.forEach((dep) => {
+          (<any>knot)[dep] = this.resolve(dep);
         });
         // 连接结点
         const [ok, err] = await knot.attach();
@@ -85,8 +85,8 @@ class IoC {
       const [ok, err] = await knot.detach();
       if (ok) {
         // 卸载依赖
-        knot.options.deps?.forEach((dep) => {
-          delete (<any>knot)[dep.prototype.trait];
+        knot.deps.forEach((dep) => {
+          delete (<any>knot)[dep];
         });
         delete this.__appContext![trait];
       }
