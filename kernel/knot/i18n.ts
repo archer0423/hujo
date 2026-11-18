@@ -11,7 +11,7 @@
 import { journal } from '../core/journal';
 import { Knot, KnotApi, KnotOptions } from '../core/knot';
 import { FmtString } from '../skill/literal';
-import { EventBusApi } from './event-bus';
+import { AffairApi } from './affair';
 
 /** 多语言插件配置 */
 export interface I18nOptions extends KnotOptions {
@@ -117,7 +117,7 @@ export class I18n extends Knot<I18nOptions> implements I18nApi {
   } as const;
 
   // public
-  declare public readonly ['event-bus']: EventBusApi;
+  declare public readonly affair: AffairApi;
 
   public constructor() {
     super();
@@ -129,7 +129,7 @@ export class I18n extends Knot<I18nOptions> implements I18nApi {
   }
 
   public get deps(): string[] {
-    return ['event-bus'];
+    return ['affair'];
   }
 
   public get language(): string {
@@ -145,7 +145,7 @@ export class I18n extends Knot<I18nOptions> implements I18nApi {
     if (this.__current !== language) {
       const prev = this.__current;
       this.__current = language;
-      this['event-bus'].sys.notify(I18n.EVENT.LANGUAGE_CHANGED, { current: language, prev });
+      this.affair.sys.notify(I18n.EVENT.LANGUAGE_CHANGED, { current: language, prev });
     }
   }
 

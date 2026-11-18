@@ -12,15 +12,15 @@ import { journal } from '../core/journal';
 import { Knot, KnotApi, KnotOptions } from '../core/knot';
 import { RunSync } from '../skill/might';
 
-/** 监听器 */
-export type EventBusListener = [
-  process: (message: EventBusPacket) => void,
+/** 事件监听器 */
+export type AffairListener = [
+  process: (message: AffairPacket) => void,
   ambient: unknown,
   once: boolean,
 ];
 
 /** 消息数据包 */
-export interface EventBusPacket<T = unknown> {
+export interface AffairPacket<T = unknown> {
   /** 事件 */
   event: string;
   /** 数据 */
@@ -28,7 +28,7 @@ export interface EventBusPacket<T = unknown> {
 }
 
 /** 事件渠道统计 */
-export interface EventBusStats {
+export interface AffairStats {
   /** 渠道 */
   channel: string;
   /** 事件 */
@@ -38,16 +38,16 @@ export interface EventBusStats {
 }
 
 /** 事件总线插件配置 */
-export interface EventBusOptions extends KnotOptions {}
+export interface AffairOptions extends KnotOptions {}
 
 /**
  * 事件总线接口
  */
-export interface EventBusApi extends KnotApi<EventBusOptions> {
+export interface AffairApi extends KnotApi<AffairOptions> {
   /** 监听器数量 */
   get size(): number;
   /** 渠道详情 */
-  get stats(): EventBusStats[];
+  get stats(): AffairStats[];
   /**
    * 渠道是否已部署
    * @param channel - 渠道
@@ -57,7 +57,7 @@ export interface EventBusApi extends KnotApi<EventBusOptions> {
    * 获取事件渠道
    * @param channel 渠道
    */
-  acquire(channel: string): EventChannel;
+  acquire(channel: string): AffairChannel;
   /**
    * 移除渠道
    * @param channel - 渠道
@@ -66,15 +66,15 @@ export interface EventBusApi extends KnotApi<EventBusOptions> {
   /** 清空所有渠道 */
   clear(): void;
   /** 默认事件渠道（访问即创建） */
-  get sys(): EventChannel;
+  get sys(): AffairChannel;
   /** GUI 事件渠道（访问即创建） */
-  get gui(): EventChannel;
+  get gui(): AffairChannel;
   /** HTTP 事件渠道（访问即创建） */
-  get http(): EventChannel;
+  get http(): AffairChannel;
   /** socket 事件渠道（访问即创建） */
-  get net(): EventChannel;
+  get net(): AffairChannel;
   /** Red 事件渠道（访问即创建） */
-  get red(): EventChannel;
+  get red(): AffairChannel;
 }
 
 // implements
@@ -83,15 +83,15 @@ export interface EventBusApi extends KnotApi<EventBusOptions> {
  * 事件消息
  * @final
  */
-export class EventMessage<T = unknown> implements EventBusPacket<T> {
+export class AffairMessage<T = unknown> implements AffairPacket<T> {
   /** 不带数据包的消息 */
   public static NoPayload(event: string) {
-    return new EventMessage<undefined>(event);
+    return new AffairMessage<undefined>(event);
   }
 
   /** 带数据包的消息 */
   public static WithPayload<D>(event: string, payload: D) {
-    return new EventMessage<D>(event, payload);
+    return new AffairMessage<D>(event, payload);
   }
 
   public readonly event: string;
@@ -112,7 +112,7 @@ export class EventMessage<T = unknown> implements EventBusPacket<T> {
 /**
  * 事件渠道
  */
-export class EventChannel {
+export class AffairChannel {
   // public
 
   /** 渠道 */
@@ -135,8 +135,8 @@ export class EventChannel {
   }
 
   /** 渠道详情 */
-  public get stats(): EventBusStats[] {
-    const stats: EventBusStats[] = [];
+  public get stats(): AffairStats[] {
+    const stats: AffairStats[] = [];
     this.__listeners.forEach((processMap, event) => {
       let listeners = 0;
       processMap.forEach((ambientMap) => {
@@ -166,12 +166,12 @@ export class EventChannel {
    */
   public add(
     event: string,
-    process: (message: EventBusPacket) => void,
+    process: (message: AffairPacket) => void,
     ambient: unknown,
     once?: boolean,
   ): void {
     if (ambient === undefined || ambient === null) {
-      this.__logger.error('<EventChannel> ambient 不允许为空');
+      this.__logger.error('<AffairChannel> ambient 不允许为空');
       return;
     }
 
@@ -193,7 +193,7 @@ export class EventChannel {
       return;
     }
 
-    const listener: EventBusListener = [process, ambient, once!];
+    const listener: AffairListener = [process, ambient, once!];
     ambientMap.set(ambient, listener);
   }
 
@@ -203,7 +203,7 @@ export class EventChannel {
    * @param process - 处理方式
    * @param ambient - 环境
    */
-  public remove(event: string, process: (message: EventBusPacket) => void, ambient: unknown): void {
+  public remove(event: string, process: (message: AffairPacket) => void, ambient: unknown): void {
     if (this.__listeners.has(event)) {
       const processMap = this.__listeners.get(event)!;
       const ambientMap = processMap.get(process);
@@ -267,21 +267,21 @@ export class EventChannel {
    *      once 监听器执行后立即移除（嵌套通报不会重复执行）
    * @param message - 数据（不可为空）
    */
-  public notify(msg: EventBusPacket | string, payload?: EventBusPacket['payload']): void {
+  public notify(msg: AffairPacket | string, payload?: AffairPacket['payload']): void {
     if (typeof msg === 'string') {
       if (typeof payload === 'undefined') {
-        msg = EventMessage.NoPayload(msg);
+        msg = AffairMessage.NoPayload(msg);
       } else {
-        msg = EventMessage.WithPayload(msg, payload);
+        msg = AffairMessage.WithPayload(msg, payload);
       }
     }
 
     if (msg === null || msg === undefined) {
-      this.__logger.error('<EventChannel> 通报失败：消息不可为空');
+      this.__logger.error('<AffairChannel> 通报失败：消息不可为空');
       return;
     }
     if (!msg.event || typeof msg.event !== 'string') {
-      this.__logger.error('<EventChannel> 通报失败：消息 Event 必须为非空字符串');
+      this.__logger.error('<AffairChannel> 通报失败：消息 Event 必须为非空字符串');
       return;
     }
 
@@ -320,7 +320,7 @@ export class EventChannel {
           }
         }
         const err = RunSync(processFn, ambientObj, msg)[1];
-        if (err) this.__logger.error('<EventChannel> 监听器执行报错：', err);
+        if (err) this.__logger.error('<AffairChannel> 监听器执行报错：', err);
       }
       // 如果 event 已被删除，跳出外层循环
       if (!this.__listeners.has(msg.event)) {
@@ -340,25 +340,22 @@ export class EventChannel {
    *
    * 查找复杂度：O(1)
    */
-  private __listeners: Map<
-    string,
-    Map<EventBusListener[0], Map<EventBusListener[1], EventBusListener>>
-  >;
+  private __listeners: Map<string, Map<AffairListener[0], Map<AffairListener[1], AffairListener>>>;
 
   /** 专属日志记录器 */
   private get __logger() {
-    return journal.acquire('event-bus');
+    return journal.acquire(Affair.prototype.trait);
   }
 }
 
 /**
  * 事件总线结点
  */
-export class EventBus extends Knot<EventBusOptions> implements EventBusApi {
+export class Affair extends Knot<AffairOptions> implements AffairApi {
   // public
 
   public get trait(): string {
-    return 'event';
+    return 'affair';
   }
 
   public constructor() {
@@ -370,39 +367,39 @@ export class EventBus extends Knot<EventBusOptions> implements EventBusApi {
     return this.__channels.size;
   }
 
-  public get stats(): EventBusStats[] {
-    const stats: EventBusStats[] = [];
+  public get stats(): AffairStats[] {
+    const stats: AffairStats[] = [];
     this.__channels.forEach((channel) => {
       stats.push(...channel.stats);
     });
     return stats;
   }
 
-  public get sys(): EventChannel {
+  public get sys(): AffairChannel {
     return this.acquire('sys');
   }
 
-  public get gui(): EventChannel {
+  public get gui(): AffairChannel {
     return this.acquire('gui');
   }
 
-  public get http(): EventChannel {
+  public get http(): AffairChannel {
     return this.acquire('http');
   }
 
-  public get net(): EventChannel {
+  public get net(): AffairChannel {
     return this.acquire('net');
   }
 
-  public get red(): EventChannel {
+  public get red(): AffairChannel {
     return this.acquire('red');
   }
 
-  public acquire(channel: string): EventChannel {
+  public acquire(channel: string): AffairChannel {
     if (this.__channels.has(channel)) {
       return this.__channels.get(channel)!;
     } else {
-      const instance = new EventChannel(channel);
+      const instance = new AffairChannel(channel);
       this.__channels.set(channel, instance);
       return instance;
     }
@@ -438,5 +435,5 @@ export class EventBus extends Knot<EventBusOptions> implements EventBusApi {
   // private
 
   /** 事件渠道容器 */
-  private __channels: Map<string, EventChannel>;
+  private __channels: Map<string, AffairChannel>;
 }
