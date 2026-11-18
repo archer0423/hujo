@@ -32,6 +32,7 @@ export * from './knot/affair';
 export * from './knot/i18n';
 export * from './knot/launcher';
 export * from './knot/native';
+export * from './knot/pool';
 export * from './knot/spider';
 export * from './knot/tabular';
 export * from './knot/timer';
