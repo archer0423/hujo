@@ -132,6 +132,8 @@ export class Sentry extends Knot<SentryOptions> implements SentryApi {
       }
     }
 
+    this.__signatures.clear();
+
     return Promise.resolve(true);
   }
 
