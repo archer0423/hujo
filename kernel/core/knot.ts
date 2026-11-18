@@ -35,10 +35,10 @@ export interface KnotApi<P extends KnotOptions> {
   /** 是否已断开 */
   readonly detached: boolean;
   /**
-   * 注册
+   * 连接结点
    * @param options 选项
    */
-  register(options: P): void;
+  link(options: P): void;
   /** 连接 */
   attach(): ActionResult;
   /** 断开 */
@@ -71,7 +71,7 @@ export abstract class Knot<P extends KnotOptions = {}> implements KnotApi<P> {
     return this.__actionDetach?.success ?? false;
   }
 
-  public register(options: P): void {
+  public link(options: P): void {
     this.options = options;
   }
 

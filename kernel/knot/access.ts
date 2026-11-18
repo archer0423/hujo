@@ -71,7 +71,7 @@ export interface AccessApi extends KnotApi<KnotOptions> {
    * @param trait 标识
    * @param env 环境
    */
-  inject(trait: string, env: AccessEntry): void;
+  put(trait: string, env: AccessEntry): void;
 }
 
 /** 可访问环境结点 */
@@ -108,7 +108,7 @@ export class Access extends Knot implements AccessApi {
     return this.__workspaces.get(trait);
   }
 
-  public inject(trait: string, env?: AccessEntry) {
+  public put(trait: string, env?: AccessEntry) {
     if (this.__workspaces.has(trait)) {
       this.logger.warn(`环境已存在，请勿重复添加 >>> ${trait}`);
       return;
@@ -120,9 +120,9 @@ export class Access extends Knot implements AccessApi {
   // protected
 
   protected _attach(): Promise<boolean> {
-    this.inject('global', (globalThis || window || self || frames || {}) as AccessEntry);
-    this.inject('user');
-    this.inject('dev');
+    this.put('global', (globalThis || window || self || frames || {}) as AccessEntry);
+    this.put('user');
+    this.put('dev');
     return Promise.resolve(true);
   }
 

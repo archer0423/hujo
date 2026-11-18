@@ -33,7 +33,7 @@ class IoC {
     }
 
     const knot = new ctor();
-    knot.register(options!);
+    knot.link(options!);
     this.__knots.set(trait, knot);
   }
 
