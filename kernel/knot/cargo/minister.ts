@@ -56,7 +56,7 @@ export interface CargoMinisterApi extends KnotApi<CargoMinisterOptions> {
   /** 释放过时的资产 */
   releaseExpires(): void;
   /** 加载资产 */
-  load(uri: CargoURI): Promise<void>;
+  load(uri: CargoURI): Promise<boolean>;
   /**
    * 批量加载资产
    * @param items 入参资产
@@ -163,18 +163,20 @@ export class CargoMinister extends Knot<CargoMinisterOptions> implements CargoMi
             this.logger.warn(`不合理的回收 >>> ${uri}`);
           }
         }
+        host[key] = null!;
       }
-      host[key] = null!;
     }
   }
 
-  public load(uri: CargoURI): Promise<void> {
-    const [protocol] = ParseCargoURI(uri);
-    if (protocol === 'remote') {
-      return this.remote.load(uri as CargoRemoteURI);
-    } else {
-      return this.dynamic.load(uri);
-    }
+  public load(uri: CargoURI): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+      const [protocol] = ParseCargoURI(uri);
+      if (protocol === 'remote') {
+        this.remote.load(uri as CargoRemoteURI).then(() => resolve(this.has(uri)));
+      } else {
+        return this.dynamic.load(uri).then(() => resolve(this.has(uri)));
+      }
+    });
   }
 
   public loadBatch(items: CargoURI[], parallels?: number) {
