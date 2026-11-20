@@ -101,17 +101,17 @@ export interface LauncherApi extends KnotApi<LauncherOptions> {
   /** 是否支持语言 */
   isLanguageSupported(language: LanguageType): boolean;
   /** 场景（场景未启动前为 null，消费方需防护） */
-  readonly scene: Scene | null;
+  readonly scene: Scene;
   /** 根节点（场景未启动前为 null，消费方需防护） */
-  readonly root: Node | null;
+  readonly root: Node;
   /** 挂载节点（场景未启动前为 null，消费方需防护） */
-  readonly mnt: Node | null;
+  readonly mnt: Node;
   /** 画布（场景未启动前为 null，消费方需防护） */
-  readonly canvas: Canvas | null;
+  readonly canvas: Canvas;
   /** UI相机（场景未启动前为 null，消费方需防护） */
-  readonly cameraUi: Camera | null;
+  readonly cameraUi: Camera;
   /** 舞台（场景未启动前为 null，消费方需防护） */
-  readonly stage: Node | null;
+  readonly stage: Node;
   /** 暂停逻辑 */
   pause(): void;
   /** 恢复逻辑 */
