@@ -12,8 +12,12 @@ import { assetManager, Asset } from 'cc';
 
 import { Knot, KnotApi, KnotOptions } from '../../core/knot';
 import { Now } from '../../skill/datetime';
+import { Split } from '../../skill/list';
+import { CargoDynamicApi } from './dynamic';
 import { CargoRegistryApi } from './registry';
-import { CargoDigest, CargoURI } from './typings';
+import { CargoRemoteApi } from './remote';
+import { CargoDigest, CargoDynamicURI, CargoRemoteURI, CargoURI } from './typings';
+import { ParseCargoURI } from './util';
 
 /** 资产管理选项 */
 export interface CargoMinisterOptions extends KnotOptions {}
@@ -51,6 +55,18 @@ export interface CargoMinisterApi extends KnotApi<CargoMinisterOptions> {
   free<H extends object, K extends keyof H>(host: H, key: K): void;
   /** 释放过时的资产 */
   releaseExpires(): void;
+  /** 加载资产 */
+  load(uri: CargoURI): Promise<void>;
+  /**
+   * 批量加载资产
+   * @param items 入参资产
+   * @param parallels 每批次并发数量
+   */
+  loadBatch(items: CargoURI[], parallels?: number): Promise<void>;
+  /** 中断资产加载 */
+  abort(uri: CargoURI): void;
+  /** 批量中断资产加载 */
+  abortBatch(items: CargoURI[]): void;
 }
 
 /** 资产管理结点 */
@@ -58,6 +74,8 @@ export class CargoMinister extends Knot<CargoMinisterOptions> implements CargoMi
   // public
 
   declare public readonly registry: CargoRegistryApi;
+  declare public readonly remote: CargoRemoteApi;
+  declare public readonly dynamic: CargoDynamicApi;
 
   public constructor() {
     super();
@@ -147,6 +165,42 @@ export class CargoMinister extends Knot<CargoMinisterOptions> implements CargoMi
         }
       }
       host[key] = null!;
+    }
+  }
+
+  public load(uri: CargoURI): Promise<void> {
+    const [protocol] = ParseCargoURI(uri);
+    if (protocol === 'remote') {
+      return this.remote.load(uri as CargoRemoteURI);
+    } else {
+      return this.dynamic.load(uri);
+    }
+  }
+
+  public loadBatch(items: CargoURI[], parallels?: number) {
+    return new Promise<void>((resolve) => {
+      const promises = items.map((item) => this.load(item));
+      if (parallels && Number.isInteger(parallels) && parallels > 0) {
+        const wrappers = Split(promises, parallels).map((item) => Promise.all(item));
+        Promise.all(wrappers).then(() => resolve());
+      } else {
+        Promise.all(promises).then(() => resolve());
+      }
+    });
+  }
+
+  public abort(uri: CargoURI): void {
+    if (this.dynamic.has(uri as CargoDynamicURI)) {
+      this.dynamic.abort(uri as CargoDynamicURI);
+    }
+    if (this.remote.has(uri as CargoRemoteURI)) {
+      this.remote.abort(uri as CargoRemoteURI);
+    }
+  }
+
+  public abortBatch(items: CargoURI[]): void {
+    for (const item of items) {
+      this.abort(item);
     }
   }
 

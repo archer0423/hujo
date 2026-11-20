@@ -14,7 +14,7 @@ import { Knot, KnotApi, KnotOptions } from '../../core/knot';
 import { Split } from '../../skill/list';
 import { CargoMinisterApi } from './minister';
 import { CargoRegistryApi } from './registry';
-import { CargoLoadItem, CargoLoadState, CargoURI } from './typings';
+import { CargoDynamicURI, CargoLoadItem, CargoLoadState, CargoURI } from './typings';
 import { GetCargoFactory, IsValidCargoURI, ParseCargoURI } from './util';
 
 /** 动态加载器选项 */
@@ -22,6 +22,8 @@ export interface CargoDynamicOptions extends KnotOptions {}
 
 /** 动态加载器接口 */
 export interface CargoDynamicApi extends KnotApi<CargoDynamicOptions> {
+  /** 是否在请求缓存中 */
+  has(uri: CargoDynamicURI): boolean;
   /** 加载资产 */
   load(uri: CargoURI): Promise<void>;
   /**
@@ -29,11 +31,11 @@ export interface CargoDynamicApi extends KnotApi<CargoDynamicOptions> {
    * @param items 入参资产
    * @param parallels 每批次并发数量
    */
-  loadBatch(items: CargoURI[], parallels?: number): Promise<void>;
+  loadBatch(items: CargoDynamicURI[], parallels?: number): Promise<void>;
   /** 中断资产加载 */
-  abort(uri: CargoURI): void;
+  abort(uri: CargoDynamicURI): void;
   /** 批量中断资产加载 */
-  abortBatch(items: CargoURI[]): void;
+  abortBatch(items: CargoDynamicURI[]): void;
   /** 放弃缓存 */
   uncache(uri: string): void;
   /** 加载统计 */
@@ -76,8 +78,12 @@ export class CargoDynamic extends Knot<CargoDynamicOptions> implements CargoDyna
     return ['minister', 'registry'];
   }
 
-  public uncache(uri: string): void {
+  public uncache(uri: CargoDynamicURI): void {
     this.__requests.delete(uri);
+  }
+
+  public has(uri: CargoDynamicURI): boolean {
+    return this.__requests.has(uri);
   }
 
   public get stats() {
@@ -108,7 +114,7 @@ export class CargoDynamic extends Knot<CargoDynamicOptions> implements CargoDyna
     return stats;
   }
 
-  public async load(uri: CargoURI): Promise<void> {
+  public async load(uri: CargoDynamicURI): Promise<void> {
     if (!this.registry.has(uri)) {
       this.logger.warn(`资产未注册 >>> ${uri}`);
       return Promise.resolve();
@@ -155,7 +161,7 @@ export class CargoDynamic extends Knot<CargoDynamicOptions> implements CargoDyna
     return item.promise!;
   }
 
-  public async loadBatch(items: CargoURI[], parallels?: number): Promise<void> {
+  public async loadBatch(items: CargoDynamicURI[], parallels?: number): Promise<void> {
     return new Promise<void>((resolve) => {
       const promises = items.map((item) => this.load(item));
       if (parallels && Number.isInteger(parallels) && parallels > 0) {
@@ -167,14 +173,14 @@ export class CargoDynamic extends Knot<CargoDynamicOptions> implements CargoDyna
     });
   }
 
-  public abort(uri: CargoURI): void {
+  public abort(uri: CargoDynamicURI): void {
     if (this.__requests.has(uri)) {
       this.__requests.get(uri)!.abort();
       this.__requests.delete(uri);
     }
   }
 
-  public abortBatch(items: CargoURI[]): void {
+  public abortBatch(items: CargoDynamicURI[]): void {
     for (const item of items) {
       this.abort(item);
     }
@@ -202,7 +208,7 @@ export class CargoDynamic extends Knot<CargoDynamicOptions> implements CargoDyna
    * @param uri 资产标识
    * @returns
    */
-  private __load(uri: CargoURI): Promise<boolean> {
+  private __load(uri: CargoDynamicURI): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
       if (!IsValidCargoURI(uri)) {
         this.logger.error(`无效的资产标识 >>> ${uri}`);

@@ -63,13 +63,13 @@ export type CargoType =
  * - 动态资产: `bundle@path#type`
  * - 远程资产: `remote@path#type.ext`
  */
-export type CargoURI = DynamicCargoURI | RemoteCargoURI;
+export type CargoURI = CargoDynamicURI | CargoRemoteURI;
 
 /** 动态资产标识（构成） */
-export type DynamicCargoURI = `${string}@${string}#${CargoType}`;
+export type CargoDynamicURI = `${string}@${string}#${CargoType}`;
 
 /** 远程资产标识（构成） */
-export type RemoteCargoURI = `remote@${string}#${CargoType}.${string}`;
+export type CargoRemoteURI = `remote@${string}#${CargoType}.${string}`;
 
 /** 资产信息 */
 export type CargoItem = [uri: CargoURI, ttl?: number];

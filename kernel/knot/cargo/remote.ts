@@ -34,7 +34,7 @@ import { ParseFnt } from './parser/fnt-parser';
 import { ParsePlistAtlas } from './parser/plist-parser';
 import { ParseSpineAtlas } from './parser/spine-atlas-parser';
 import { CargoRegistryApi } from './registry';
-import { CargoLoadItem, CargoLoadState, RemoteCargoURI } from './typings';
+import { CargoLoadItem, CargoLoadState, CargoRemoteURI } from './typings';
 import { ParseCargoURI } from './util';
 
 /** 远程加载器选项 */
@@ -45,18 +45,20 @@ export interface CargoRemoteOptions extends KnotOptions {
 
 /** 远程加载器接口 */
 export interface CargoRemoteApi extends KnotApi<CargoRemoteOptions> {
+  /** 是否在请求缓存中 */
+  has(uri: CargoRemoteURI): boolean;
   /** 加载资产 */
-  load(uri: RemoteCargoURI): Promise<void>;
+  load(uri: CargoRemoteURI): Promise<void>;
   /**
    * 批量加载资产
    * @param items 入参资产
    * @param parallels 每批次并发数量
    */
-  loadBatch(items: RemoteCargoURI[], parallels?: number): Promise<void>;
+  loadBatch(items: CargoRemoteURI[], parallels?: number): Promise<void>;
   /** 中断资产加载 */
-  abort(uri: RemoteCargoURI): void;
+  abort(uri: CargoRemoteURI): void;
   /** 批量中断资产加载 */
-  abortBatch(items: RemoteCargoURI[]): void;
+  abortBatch(items: CargoRemoteURI[]): void;
   /** 加载统计 */
   readonly stats: {
     /** 总数 */
@@ -93,7 +95,7 @@ export class CargoRemote extends Knot<CargoRemoteOptions> implements CargoRemote
     return ['minister', 'registry'];
   }
 
-  public load(uri: RemoteCargoURI): Promise<void> {
+  public load(uri: CargoRemoteURI): Promise<void> {
     if (!this.registry.has(uri)) {
       this.logger.warn(`资产未注册 >>> ${uri}`);
       return Promise.resolve();
@@ -177,7 +179,7 @@ export class CargoRemote extends Knot<CargoRemoteOptions> implements CargoRemote
     return item.promise!;
   }
 
-  public loadBatch(items: RemoteCargoURI[], parallels?: number): Promise<void> {
+  public loadBatch(items: CargoRemoteURI[], parallels?: number): Promise<void> {
     return new Promise<void>((resolve) => {
       const promises = items.map((item) => this.load(item));
       if (parallels && Number.isInteger(parallels) && parallels > 0) {
@@ -189,17 +191,21 @@ export class CargoRemote extends Knot<CargoRemoteOptions> implements CargoRemote
     });
   }
 
-  public abort(uri: RemoteCargoURI): void {
+  public abort(uri: CargoRemoteURI): void {
     if (this.__requests.has(uri)) {
       this.__requests.get(uri)!.abort();
       this.__requests.delete(uri);
     }
   }
 
-  public abortBatch(items: RemoteCargoURI[]): void {
+  public abortBatch(items: CargoRemoteURI[]): void {
     for (const item of items) {
       this.abort(item);
     }
+  }
+
+  public has(uri: CargoRemoteURI) {
+    return this.__requests.has(uri);
   }
 
   public get stats() {
@@ -256,7 +262,7 @@ export class CargoRemote extends Knot<CargoRemoteOptions> implements CargoRemote
     return `${this.options.url.replace(/\/+$/, '')}/${encodeURI(path.replace(/^\/+/, ''))}`;
   }
 
-  private __wrap(uri: RemoteCargoURI, item: CargoLoadItem, promise: Promise<[Asset?, Error?]>) {
+  private __wrap(uri: CargoRemoteURI, item: CargoLoadItem, promise: Promise<[Asset?, Error?]>) {
     return new Promise<void>((resolve) => {
       promise.then(([data]) => {
         if ((item as unknown as { __aborted: boolean }).__aborted) {
