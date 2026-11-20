@@ -8,7 +8,6 @@
  * Copyright (c) 2026 archer0423
  *******************************************/
 
-/** 
 // core
 export * from './core/knot';
 export * from './core/ioc';
@@ -29,6 +28,11 @@ export * from './knot/access';
 export * from './knot/archive';
 export * from './knot/auditor';
 export * from './knot/affair';
+export * from './knot/cargo/typings';
+export * from './knot/cargo/registry';
+export * from './knot/cargo/dynamic';
+export * from './knot/cargo/minister';
+export * from './knot/cargo/remote';
 export * from './knot/i18n';
 export * from './knot/launcher';
 export * from './knot/native';
@@ -56,4 +60,3 @@ export * from './skill/md5';
 export * from './skill/might';
 export * from './skill/regexp';
 export * from './skill/web';
- */

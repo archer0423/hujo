@@ -1,0 +1,138 @@
+/*******************************************
+ * ██╗  ██╗ ██╗   ██╗      ██╗  ██████╗
+ * ██║  ██║ ██║   ██║      ██║ ██╔═══██╗
+ * ███████║ ██║   ██║      ██║ ██║   ██║
+ * ██╔══██║ ██║   ██║ ██   ██║ ██║   ██║
+ * ██║  ██║ ╚██████╔╝ ╚█████╔╝ ╚██████╔╝
+ * ╚═╝  ╚═╝  ╚═════╝   ╚════╝   ╚═════╝
+ * Copyright (c) 2026 archer0423
+ *******************************************/
+
+import { Asset } from 'cc';
+
+/** 资产构造 */
+export type CargoCtor = new (...args: any[]) => Asset;
+
+/** 资产加载状态 */
+export enum CargoLoadState {
+  /** 未加载 */
+  Idle,
+  /** 加载中 */
+  Loading,
+  /** 加载完成 */
+  Loaded,
+  /** 加载错误 */
+  Error,
+  /** 加载中断 */
+  Aborted,
+}
+
+/** 资产加载项目 */
+export interface CargoLoadItem {
+  /** 资产标识 */
+  uri: CargoURI;
+  /** 加载状态 */
+  state: CargoLoadState;
+  /** 加载请求 */
+  promise?: Promise<void>;
+  /** 中断加载请求 */
+  abort: () => void;
+}
+
+/** 资产类型 */
+export type CargoType =
+  | 'image'
+  | 'texture'
+  | 'sprite-frame'
+  | 'sprite-atlas'
+  | 'ttfont'
+  | 'bmfont'
+  | 'buffer'
+  | 'text'
+  | 'json'
+  | 'skeleton'
+  | 'audio'
+  | 'video'
+  | 'particle'
+  | 'tiledmap'
+  | 'animation'
+  | 'prefab';
+
+/**
+ * 资产标识（构成）
+ * - 动态资产: `bundle@path#type`
+ * - 远程资产: `remote@path#type.ext`
+ */
+export type CargoURI = DynamicCargoURI | RemoteCargoURI;
+
+/** 动态资产标识（构成） */
+export type DynamicCargoURI = `${string}@${string}#${CargoType}`;
+
+/** 远程资产标识（构成） */
+export type RemoteCargoURI = `remote@${string}#${CargoType}.${string}`;
+
+/** 资产信息 */
+export type CargoItem = [uri: CargoURI, ttl?: number];
+
+/** 资产概要 */
+export interface CargoDigest {
+  /** 资产标识 */
+  uri: string;
+  /** 资产 */
+  asset: Asset;
+  /** 自维护的引用计数（与引擎的区分开） */
+  ref: number;
+  /** 最后一次使用的时间（毫秒） */
+  recent: number;
+  /** 存活时间（毫秒） */
+  ttl: number;
+}
+
+/** 图集帧定义（plist 归一化后，坐标为图像坐标） */
+export interface AtlasFrameDef {
+  /** 贴图中的矩形（rotated 时为存储方向尺寸，消费侧交换） */
+  rect: { x: number; y: number; width: number; height: number };
+  /** 是否旋转 */
+  rotated: boolean;
+  /** 裁剪中心偏移 */
+  offset: { x: number; y: number };
+  /** 原始尺寸 */
+  originalSize: { width: number; height: number };
+}
+
+/** 图集配置 */
+export interface AtlasConfig {
+  /** 贴图文件名（相对 plist 同目录） */
+  textureFile: string;
+  /** 帧表（键为帧名） */
+  frames: Record<string, AtlasFrameDef>;
+}
+
+/** 位图字体字符定义 */
+export interface FntCharDef {
+  /** 字符在贴图中的矩形（图像坐标，左上原点） */
+  rect: { x: number; y: number; width: number; height: number };
+  /** 横向偏移 */
+  xOffset: number;
+  /** 纵向偏移 */
+  yOffset: number;
+  /** 步进宽度 */
+  xAdvance: number;
+}
+
+/**
+ * 位图字体配置（字段与引擎导入器产物对齐）
+ * @tip 渲染侧消费 fontSize/commonHeight/kerningDict/fontDefDictionary
+ */
+export interface FntConfig {
+  /** 字号 */
+  fontSize: number;
+  /** 通用行高 */
+  commonHeight: number;
+  /** 贴图文件名 */
+  atlasName: string;
+  /** 字距表（键为 `(first << 16) | second`） */
+  kerningDict: Record<string, number>;
+  /** 字符定义表（键为字符码的字符串形式） */
+  fontDefDictionary: Record<string, FntCharDef>;
+}
