@@ -39,6 +39,7 @@ export * from './knot/native';
 export * from './knot/pool';
 export * from './knot/sentry';
 export * from './knot/spider';
+export * from './knot/sound';
 export * from './knot/tabular';
 export * from './knot/timer';
 // skill
