@@ -31,7 +31,7 @@ import { GetQueryString } from '../skill/web';
 import { AffairApi } from './affair';
 
 /** 语言代码 */
-export type LanguageCode = __private._pal_system_info_enum_type_language__Language;
+export type LanguageType = __private._pal_system_info_enum_type_language__Language;
 
 /**
  * 应用构建版本
@@ -58,7 +58,7 @@ export interface LauncherOptions extends KnotOptions {
   /** 构建版本 */
   build: Build;
   /** 支持语言 */
-  language: LanguageCode[];
+  language: LanguageType[];
   /** 用户空间标识（仅开发时使用，用于区分独立数据的用户空间，默认 `default`） */
   workspace?: string;
   /** 允许经 URL 覆写的配置键（在默认白名单基础上追加，保留键除外） */
@@ -95,11 +95,11 @@ export interface LauncherApi extends KnotApi<LauncherOptions> {
   /** 用户空间标识 */
   readonly workspace: string;
   /** 获取当前支持的语言列表 */
-  readonly supportedLanguages: LanguageCode[];
+  readonly supportedLanguages: LanguageType[];
   /** 是否指定构建版本 */
   isBuildOf(build: Build): boolean;
   /** 是否支持语言 */
-  isLanguageSupported(language: LanguageCode): boolean;
+  isLanguageSupported(language: LanguageType): boolean;
   /** 场景（场景未启动前为 null，消费方需防护） */
   readonly scene: Scene | null;
   /** 根节点（场景未启动前为 null，消费方需防护） */
@@ -160,7 +160,7 @@ export class Launcher extends Knot<LauncherOptions> implements LauncherApi {
   public readonly isCandidate!: boolean;
   public readonly isRelease!: boolean;
   public readonly workspace!: string;
-  public readonly supportedLanguages!: LanguageCode[];
+  public readonly supportedLanguages!: LanguageType[];
   public readonly scene!: Scene;
   public readonly root!: Node;
   public readonly mnt!: Node;
@@ -191,7 +191,7 @@ export class Launcher extends Knot<LauncherOptions> implements LauncherApi {
   }
 
   /** 是否支持语言 */
-  public isLanguageSupported(language: LanguageCode): boolean {
+  public isLanguageSupported(language: LanguageType): boolean {
     return this.options.language.includes(language);
   }
 
