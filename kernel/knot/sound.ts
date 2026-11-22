@@ -14,7 +14,7 @@ import { Knot, KnotApi, KnotOptions } from '../core/knot';
 import { Now } from '../skill/datetime';
 import { Clamp01 } from '../skill/digit';
 import { ArchiveApi, ArchiveDocument } from './archive';
-import { CargoMinisterApi } from './cargo/minister';
+import { CargoApi } from './cargo/cargo';
 import { CargoURI } from './cargo/typings';
 import { ParseCargoURI } from './cargo/util';
 import { LauncherApi } from './launcher';
@@ -182,7 +182,7 @@ export class Sound extends Knot<SoundOptions> implements SoundApi {
 
   declare public readonly archive: ArchiveApi;
   declare public readonly launcher: LauncherApi;
-  declare public readonly minister: CargoMinisterApi;
+  declare public readonly cargo: CargoApi;
 
   public constructor() {
     super();
@@ -198,7 +198,7 @@ export class Sound extends Knot<SoundOptions> implements SoundApi {
   }
 
   public get deps() {
-    return ['archive', 'launcher', 'minister'];
+    return ['archive', 'launcher', 'cargo'];
   }
 
   public get effectMuted(): boolean {
@@ -357,18 +357,18 @@ export class Sound extends Knot<SoundOptions> implements SoundApi {
 
       const session = this.__startSession(uri);
 
-      this.minister.load(uri).then((ok) => {
+      this.cargo.load(uri).then((ok) => {
         if (!ok) {
           this.logger.warn(`音频资产加载失败 >>> ${uri}`);
           resolve(0);
         }
 
-        const clip = this.minister.get(uri)!.asset as AudioClip;
+        const clip = this.cargo.get(uri)!.asset as AudioClip;
         switch (type) {
           case 'one-shot-effect':
             {
               // @ts-ignore
-              this.minister.alloc(uri, session.source, `#clip-${session.id}`);
+              this.cargo.alloc(uri, session.source, `#clip-${session.id}`);
               // 一次性播放
               session.source.playOneShot(clip, scalar!);
               // 超时回收
@@ -377,7 +377,7 @@ export class Sound extends Knot<SoundOptions> implements SoundApi {
             break;
           case 'effect':
             {
-              this.minister.alloc(uri, session.source, 'clip');
+              this.cargo.alloc(uri, session.source, 'clip');
               session.source.volume = this.effectVolume * scalar! * 0.01;
               session.source.loop = loop!;
               session.source.play();
@@ -390,7 +390,7 @@ export class Sound extends Knot<SoundOptions> implements SoundApi {
             break;
           case 'music':
             {
-              this.minister.alloc(uri, session.source, 'clip');
+              this.cargo.alloc(uri, session.source, 'clip');
               session.source.volume = this.musicVolume * scalar! * 0.01;
               session.source.loop = loop!;
               session.source.play();
@@ -548,7 +548,7 @@ export class Sound extends Knot<SoundOptions> implements SoundApi {
       // 强制停止播放并回收资产
       const source = node.getComponent(AudioSource)!;
       source.stop();
-      this.minister.free(source, 'clip');
+      this.cargo.free(source, 'clip');
       // 与父节点脱离
       node.parent = null;
       // 缓存或丢弃
@@ -625,7 +625,7 @@ export class Sound extends Knot<SoundOptions> implements SoundApi {
       const { id, type, source } = session;
       if (type === 'one-shot-effect') {
         // @ts-ignore
-        this.minister.free(source, `#clip-${id}`);
+        this.cargo.free(source, `#clip-${id}`);
       } else if (type === 'music') {
         this.__putPlayer(source.node, false);
       } else {

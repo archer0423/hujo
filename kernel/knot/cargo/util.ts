@@ -101,6 +101,25 @@ export function IsValidCargoURI(uri: CargoURI) {
   return true;
 }
 
+/**
+ * 是否有效的资产标识
+ * @param uri 资产标识
+ * @returns
+ */
+export function IsTargetedCargoURI(uri: CargoURI, target: CargoType) {
+  const [protocol, path, type] = ParseCargoURI(uri);
+  if (typeof protocol !== 'string' || typeof path !== 'string' || typeof type !== 'string') {
+    return false;
+  }
+  if (!protocol || !path || !type) {
+    return false;
+  }
+  if (!CARGO_TYPES.includes(type) || !CARGO_TYPES.includes(target) || type !== target) {
+    return false;
+  }
+  return true;
+}
+
 /** 获取资产构造工厂 */
 export function GetCargoFactory(type: CargoType): CargoCtor {
   return CARGO_MAPPINGS[type];

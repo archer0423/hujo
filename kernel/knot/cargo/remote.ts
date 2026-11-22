@@ -29,7 +29,7 @@ import {
 
 import { Knot, KnotApi, KnotOptions } from '../../core/knot';
 import { Split } from '../../skill/list';
-import { CargoMinisterApi } from './minister';
+import { CargoApi } from './cargo';
 import { ParseFnt } from './parser/fnt-parser';
 import { ParsePlistAtlas } from './parser/plist-parser';
 import { ParseSpineAtlas } from './parser/spine-atlas-parser';
@@ -78,7 +78,7 @@ export interface CargoRemoteApi extends KnotApi<CargoRemoteOptions> {
 export class CargoRemote extends Knot<CargoRemoteOptions> implements CargoRemoteApi {
   // public
 
-  declare public readonly minister: CargoMinisterApi;
+  declare public readonly cargo: CargoApi;
   declare public readonly registry: CargoRegistryApi;
 
   public constructor() {
@@ -92,7 +92,7 @@ export class CargoRemote extends Knot<CargoRemoteOptions> implements CargoRemote
   }
 
   public get deps() {
-    return ['minister', 'registry'];
+    return ['cargo', 'registry'];
   }
 
   public load(uri: CargoRemoteURI): Promise<void> {
@@ -101,7 +101,7 @@ export class CargoRemote extends Knot<CargoRemoteOptions> implements CargoRemote
       return Promise.resolve();
     }
 
-    if (this.minister.has(uri)) {
+    if (this.cargo.has(uri)) {
       return Promise.resolve();
     }
 
@@ -269,7 +269,7 @@ export class CargoRemote extends Knot<CargoRemoteOptions> implements CargoRemote
           return resolve();
         }
         if (data) {
-          this.minister.set(uri, data);
+          this.cargo.set(uri, data);
         }
         resolve();
       });

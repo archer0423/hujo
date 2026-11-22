@@ -10,6 +10,7 @@
 
 import { Knot, KnotApi, KnotOptions } from '../../core/knot';
 import { CargoItem, CargoURI } from './typings';
+import { IsValidCargoURI } from './util';
 
 /** 资产注册表选项 */
 export interface CargoRegistryOptions extends KnotOptions {
@@ -53,9 +54,17 @@ export class CargoRegistry extends Knot<CargoRegistryOptions> implements CargoRe
 
   public register(item: CargoItem) {
     const [uri, ttl] = item;
-    if (this.has(uri)) {
-      this.logger.warn(`资产已注册，即将被覆盖 >>> ${uri}`);
+
+    if (!IsValidCargoURI(uri)) {
+      this.logger.warn(`无效的资产标识 >>> ${uri}`);
+      return;
     }
+
+    if (this.has(uri)) {
+      this.logger.warn(`资产已注册 >>> ${uri}`);
+      return;
+    }
+
     this.__registry.set(uri, ttl ?? this.options.ttl!);
   }
 

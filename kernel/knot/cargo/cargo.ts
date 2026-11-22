@@ -20,10 +20,10 @@ import { CargoDigest, CargoDynamicURI, CargoRemoteURI, CargoURI } from './typing
 import { ParseCargoURI } from './util';
 
 /** 资产管理选项 */
-export interface CargoMinisterOptions extends KnotOptions {}
+export interface CargoOptions extends KnotOptions {}
 
 /** 资产管理接口 */
-export interface CargoMinisterApi extends KnotApi<CargoMinisterOptions> {
+export interface CargoApi extends KnotApi<CargoOptions> {
   /** 是否存在资产 */
   has(uri: CargoURI): boolean;
   /** 查询资产 */
@@ -70,7 +70,7 @@ export interface CargoMinisterApi extends KnotApi<CargoMinisterOptions> {
 }
 
 /** 资产管理结点 */
-export class CargoMinister extends Knot<CargoMinisterOptions> implements CargoMinisterApi {
+export class Cargo extends Knot<CargoOptions> implements CargoApi {
   // public
 
   declare public readonly registry: CargoRegistryApi;
@@ -85,7 +85,7 @@ export class CargoMinister extends Knot<CargoMinisterOptions> implements CargoMi
   }
 
   public get trait(): string {
-    return 'minister';
+    return 'cargo';
   }
 
   public get deps() {

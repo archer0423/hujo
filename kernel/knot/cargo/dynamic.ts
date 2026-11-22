@@ -12,7 +12,7 @@ import { assetManager } from 'cc';
 
 import { Knot, KnotApi, KnotOptions } from '../../core/knot';
 import { Split } from '../../skill/list';
-import { CargoMinisterApi } from './minister';
+import { CargoApi } from './cargo';
 import { CargoRegistryApi } from './registry';
 import { CargoDynamicURI, CargoLoadItem, CargoLoadState, CargoURI } from './typings';
 import { GetCargoFactory, IsValidCargoURI, ParseCargoURI } from './util';
@@ -61,7 +61,7 @@ export interface CargoDynamicApi extends KnotApi<CargoDynamicOptions> {
 export class CargoDynamic extends Knot<CargoDynamicOptions> implements CargoDynamicApi {
   // public
 
-  declare public readonly minister: CargoMinisterApi;
+  declare public readonly cargo: CargoApi;
   declare public readonly registry: CargoRegistryApi;
 
   public constructor() {
@@ -75,7 +75,7 @@ export class CargoDynamic extends Knot<CargoDynamicOptions> implements CargoDyna
   }
 
   public get deps() {
-    return ['minister', 'registry'];
+    return ['cargo', 'registry'];
   }
 
   public uncache(uri: CargoDynamicURI): void {
@@ -120,7 +120,7 @@ export class CargoDynamic extends Knot<CargoDynamicOptions> implements CargoDyna
       return Promise.resolve();
     }
 
-    if (this.minister.has(uri)) {
+    if (this.cargo.has(uri)) {
       return Promise.resolve();
     }
 
@@ -238,7 +238,7 @@ export class CargoDynamic extends Knot<CargoDynamicOptions> implements CargoDyna
             this.logger.error(`资源加载失败 >>> ${uri}`);
             return resolve(false);
           } else {
-            this.minister.set(uri, asset!);
+            this.cargo.set(uri, asset!);
             return resolve(true);
           }
         });

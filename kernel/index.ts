@@ -31,7 +31,7 @@ export * from './knot/affair';
 export * from './knot/cargo/typings';
 export * from './knot/cargo/registry';
 export * from './knot/cargo/dynamic';
-export * from './knot/cargo/minister';
+export * from './knot/cargo/cargo';
 export * from './knot/cargo/remote';
 export * from './knot/i18n';
 export * from './knot/launcher';
