@@ -8,11 +8,12 @@
  * Copyright (c) 2026 archer0423
  *******************************************/
 
-import { assetManager, Asset } from 'cc';
+import { assetManager, instantiate, Asset, Node, Prefab } from 'cc';
 
 import { Knot, KnotApi, KnotOptions } from '../../core/knot';
 import { Now } from '../../skill/datetime';
 import { Split } from '../../skill/list';
+import { CargoGuiURI } from '../gui/typings';
 import { CargoDynamicApi } from './dynamic';
 import { CargoRegistryApi } from './registry';
 import { CargoRemoteApi } from './remote';
@@ -53,6 +54,10 @@ export interface CargoApi extends KnotApi<CargoOptions> {
    * @param key 持有资产的键
    */
   free<H extends object, K extends keyof H>(host: H, key: K): void;
+  /** 实例化 */
+  instantiate(uri: CargoGuiURI): Node | null;
+  /** 反实例化 */
+  deinstantiate(node: Node): void;
   /** 释放过时的资产 */
   releaseExpires(): void;
   /** 加载资产 */
@@ -88,7 +93,7 @@ export class Cargo extends Knot<CargoOptions> implements CargoApi {
     return 'cargo';
   }
 
-  public get deps() {
+  public override get deps() {
     return ['registry'];
   }
 
@@ -107,7 +112,13 @@ export class Cargo extends Knot<CargoOptions> implements CargoApi {
     }
 
     if (asset && asset.isValid) {
-      this.__items.set(uri, { asset, uri, recent: Now(), ref: 0, ttl: this.registry.get(uri)! });
+      this.__items.set(uri, {
+        asset,
+        uri,
+        recent: Now(),
+        ref: 0,
+        ttl: this.registry.get(uri)!.ttl,
+      });
       this.__lookup.set(asset, uri);
     } else {
       this.logger.warn(`无效的资产 >>> ${uri}`);
@@ -166,6 +177,21 @@ export class Cargo extends Knot<CargoOptions> implements CargoApi {
         host[key] = null!;
       }
     }
+  }
+
+  public instantiate(uri: CargoGuiURI): Node | null {
+    if (this.has(uri)) {
+      const node = instantiate(this.get(uri)!.asset as Prefab);
+      // @ts-ignore
+      this.alloc(uri, node, '#prefab');
+      return node;
+    }
+    return null;
+  }
+
+  public deinstantiate(node: Node): void {
+    // @ts-ignore
+    this.free(node, '#prefab');
   }
 
   public load(uri: CargoURI): Promise<boolean> {

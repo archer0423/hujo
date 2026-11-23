@@ -8,7 +8,10 @@
  * Copyright (c) 2026 archer0423
  *******************************************/
 
-import { Asset } from 'cc';
+import { Asset, Node } from 'cc';
+
+import { GuiLayer, GuiStructSchema } from '../gui/typings';
+import { GuiViewApi } from '../gui/view';
 
 /** 资产构造 */
 export type CargoCtor = new (...args: any[]) => Asset;
@@ -72,7 +75,22 @@ export type CargoDynamicURI = `${string}@${string}#${CargoType}`;
 export type CargoRemoteURI = `remote@${string}#${CargoType}.${string}`;
 
 /** 资产信息 */
-export type CargoItem = [uri: CargoURI, ttl?: number];
+export type CargoItem = {
+  /** 资产标识 */
+  uri: CargoURI;
+  /** 存活时间 */
+  ttl: number;
+  /** 视图别名 */
+  alias?: string;
+  /** 视图所属层级 */
+  layer?: GuiLayer;
+  /** 是否支持 LRU 缓存 */
+  lru?: boolean;
+  /** 视图工厂 */
+  factory?: (node: Node) => GuiViewApi;
+  /** 视图结构 */
+  schema?: GuiStructSchema;
+};
 
 /** 资产概要 */
 export interface CargoDigest {
