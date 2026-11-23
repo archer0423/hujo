@@ -87,11 +87,11 @@ export class CargoRemote extends Knot<CargoRemoteOptions> implements CargoRemote
     this.__requests = new Map();
   }
 
-  public get trait() {
+  public override get trait() {
     return 'remote';
   }
 
-  public get deps() {
+  public override get deps() {
     return ['cargo', 'registry'];
   }
 

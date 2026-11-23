@@ -70,11 +70,11 @@ export class CargoDynamic extends Knot<CargoDynamicOptions> implements CargoDyna
     this.__requests = new Map();
   }
 
-  public get trait() {
+  public override get trait() {
     return 'dynamic';
   }
 
-  public get deps() {
+  public override get deps() {
     return ['cargo', 'registry'];
   }
 
