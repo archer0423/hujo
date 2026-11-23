@@ -181,7 +181,7 @@ export class Launcher extends Knot<LauncherOptions> implements LauncherApi {
     return 'launcher';
   }
 
-  public get deps(): string[] {
+  public override get deps(): string[] {
     return ['affair'];
   }
 

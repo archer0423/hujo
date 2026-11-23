@@ -128,7 +128,7 @@ export class I18n extends Knot<I18nOptions> implements I18nApi {
     return 'i18n';
   }
 
-  public get deps(): string[] {
+  public override get deps(): string[] {
     return ['affair'];
   }
 

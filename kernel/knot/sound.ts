@@ -197,7 +197,7 @@ export class Sound extends Knot<SoundOptions> implements SoundApi {
     return 'sound';
   }
 
-  public get deps() {
+  public override get deps() {
     return ['archive', 'launcher', 'cargo'];
   }
 

@@ -86,7 +86,7 @@ export class Sentry extends Knot<SentryOptions> implements SentryApi {
     return 'sentry';
   }
 
-  public get deps(): string[] {
+  public override get deps(): string[] {
     return ['access'];
   }
 
