@@ -23,11 +23,11 @@ export interface CargoRegistryApi extends KnotApi<CargoRegistryOptions> {
   /** 查询资产是否已注册 */
   has(uri: CargoURI): boolean;
   /** 查询资产 */
-  get(uri: CargoURI): number | undefined;
+  get(uri: CargoURI): CargoItem | undefined;
   /** 注册资产 */
-  register(item: CargoItem): void;
+  register<P extends CargoItem>(item: P): void;
   /** 批量注册资产 */
-  registerBatch(items: CargoItem[]): void;
+  registerBatch<P extends CargoItem>(items: P[]): void;
 }
 
 /** 资产注册表结点 */
@@ -40,7 +40,7 @@ export class CargoRegistry extends Knot<CargoRegistryOptions> implements CargoRe
     this.__registry = new Map();
   }
 
-  public get trait(): string {
+  public override get trait(): string {
     return 'registry';
   }
 
@@ -52,8 +52,8 @@ export class CargoRegistry extends Knot<CargoRegistryOptions> implements CargoRe
     return this.__registry.get(uri);
   }
 
-  public register(item: CargoItem) {
-    const [uri, ttl] = item;
+  public register<T extends CargoItem>(item: T) {
+    const { uri } = item;
 
     if (!IsValidCargoURI(uri)) {
       this.logger.warn(`无效的资产标识 >>> ${uri}`);
@@ -65,10 +65,12 @@ export class CargoRegistry extends Knot<CargoRegistryOptions> implements CargoRe
       return;
     }
 
-    this.__registry.set(uri, ttl ?? this.options.ttl!);
+    item.ttl = Number.isFinite(item.ttl) ? item.ttl : this.options.ttl!;
+
+    this.__registry.set(uri, item);
   }
 
-  public registerBatch(items: CargoItem[]): void {
+  public registerBatch<P extends CargoItem>(items: P[]): void {
     for (const item of items) {
       this.register(item);
     }
@@ -90,5 +92,7 @@ export class CargoRegistry extends Knot<CargoRegistryOptions> implements CargoRe
   }
 
   // private
-  private __registry: Map<string, number>;
+
+  /** 注册表 */
+  private __registry: Map<string, CargoItem>;
 }
