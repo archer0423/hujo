@@ -1,14 +1,16 @@
 import { Node } from 'cc';
 
 import { JournalLogger } from '../../core/journal';
-import { CargoGuiURI, GuiLayer } from './typings';
+import { CargoGuiURI, GuiLayer, GuiSchema } from './typings';
 
 /** Gui 视图接口 */
-export interface GuiViewApi {
+export interface GuiViewApi<S extends GuiSchema = GuiSchema> {
   /** 视图资产标识 */
   readonly uri: CargoGuiURI;
   /** 视图根节点 */
   readonly root: Node;
+  /** 视图结构 */
+  schema: S;
   /** 视图所属层级 */
   layer: GuiLayer;
   /** 编号（添加到层时由层分配） */

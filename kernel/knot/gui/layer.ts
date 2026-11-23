@@ -63,9 +63,6 @@ export abstract class GuiApsect extends Knot<GuiApsectOptions> implements GuiAps
   declare public readonly launcher: Launcher;
   declare public readonly gui: GuiApi;
 
-  /** 视图结构 */
-  public schema!: GuiSchema;
-
   public constructor() {
     super();
 
@@ -126,7 +123,7 @@ export abstract class GuiApsect extends Knot<GuiApsectOptions> implements GuiAps
         schema[alias] = comp;
       }
     }
-    this.schema = Object.freeze(schema);
+    view.schema = schema;
 
     // 添加视图：视图动画与预备
     const id = ++this.__id;
