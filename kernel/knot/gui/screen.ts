@@ -25,10 +25,6 @@ export class GuiScreen extends GuiApsect implements GuiScreenApi {
     return 'screen';
   }
 
-  public override get stack() {
-    return [];
-  }
-
   public override get layer(): GuiLayer {
     return GuiLayer.Screen;
   }

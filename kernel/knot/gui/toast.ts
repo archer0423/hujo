@@ -25,10 +25,6 @@ export class GuiToast extends GuiApsect implements GuiToastApi {
     return 'toast';
   }
 
-  public override get stack() {
-    return [];
-  }
-
   public override get layer(): GuiLayer {
     return GuiLayer.Toast;
   }

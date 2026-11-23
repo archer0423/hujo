@@ -26,10 +26,6 @@ export class GuiLoad extends GuiApsect implements GuiLoadApi {
     return 'load';
   }
 
-  public override get stack() {
-    return [];
-  }
-
   public override get layer(): GuiLayer {
     return GuiLayer.Load;
   }

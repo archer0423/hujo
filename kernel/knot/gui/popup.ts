@@ -25,10 +25,6 @@ export class GuiPopup extends GuiApsect implements GuiPopupApi {
     return 'popup';
   }
 
-  public override get stack() {
-    return [];
-  }
-
   public override get layer(): GuiLayer {
     return GuiLayer.Popup;
   }

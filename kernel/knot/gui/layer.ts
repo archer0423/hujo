@@ -47,6 +47,8 @@ export interface GuiApsectApi extends KnotApi<GuiApsectOptions> {
   get stack(): GuiViewApi[];
   /** 所属层级 */
   get layer(): GuiLayer;
+  /** 视图堆栈深度 */
+  get depth(): number;
 }
 
 /** 视图层切片结点 */
@@ -61,7 +63,7 @@ export abstract class GuiApsect extends Knot<GuiApsectOptions> implements GuiAps
   public constructor() {
     super();
 
-    this.__openList = new Map();
+    this._openList = new Map();
   }
 
   public abstract get layer(): GuiLayer;
@@ -71,7 +73,11 @@ export abstract class GuiApsect extends Knot<GuiApsectOptions> implements GuiAps
   }
 
   public get stack(): GuiViewApi[] {
-    return [...this.__openList.values()];
+    return [...this._openList.values()];
+  }
+
+  public get depth(): number {
+    return this._openList.size;
   }
 
   public abstract preOpen(uri: CargoGuiURI): Promise<boolean>;
@@ -103,11 +109,13 @@ export abstract class GuiApsect extends Knot<GuiApsectOptions> implements GuiAps
     }
     this.schema = Object.freeze(schema);
 
+    // 添加视图
     const id = ++this.__id;
     view.id = id;
-    this.__openList.set(id, view);
+    this._openList.set(id, view);
     this._root.addChild(view.root);
 
+    // 视图动画与预备
     await view.onEnterBegan();
     await view.onEnterEnded();
 
@@ -115,7 +123,7 @@ export abstract class GuiApsect extends Knot<GuiApsectOptions> implements GuiAps
   }
 
   public async didClose(view: GuiViewApi) {
-    this.__openList.delete(view.id);
+    this._openList.delete(view.id);
     await view.onExitBegan();
     await view.onExitEnded();
     view.root.removeFromParent();
@@ -131,7 +139,11 @@ export abstract class GuiApsect extends Knot<GuiApsectOptions> implements GuiAps
 
   // protected
 
+  /** 视图根节点 */
   protected _root!: Node;
+
+  /** 已打开视图列表 */
+  protected _openList: Map<number, GuiViewApi>;
 
   protected _attach(): Promise<boolean> {
     const root = new Node(this.trait);
@@ -148,7 +160,6 @@ export abstract class GuiApsect extends Knot<GuiApsectOptions> implements GuiAps
 
   // private
 
+  /** 视图编号自增计数器 */
   private __id: number = 0;
-
-  private __openList: Map<number, GuiViewApi>;
 }

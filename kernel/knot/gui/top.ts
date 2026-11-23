@@ -25,10 +25,6 @@ export class GuiTop extends GuiApsect implements GuiTopApi {
     return 'top';
   }
 
-  public override get stack() {
-    return [];
-  }
-
   public override get layer(): GuiLayer {
     return GuiLayer.Top;
   }

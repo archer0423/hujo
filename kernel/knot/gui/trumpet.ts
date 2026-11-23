@@ -25,10 +25,6 @@ export class GuiTrumpet extends GuiApsect implements GuiTrumpetApi {
     return 'trumpet';
   }
 
-  public override get stack() {
-    return [];
-  }
-
   public override get layer(): GuiLayer {
     return GuiLayer.Trumpet;
   }

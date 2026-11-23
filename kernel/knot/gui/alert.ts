@@ -26,10 +26,6 @@ export class GuiAlert extends GuiApsect implements GuiAlertApi {
     return 'alert';
   }
 
-  public override get stack() {
-    return [];
-  }
-
   public override get layer(): GuiLayer {
     return GuiLayer.Alert;
   }

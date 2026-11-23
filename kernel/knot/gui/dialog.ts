@@ -26,10 +26,6 @@ export class GuiDialog extends GuiApsect implements GuiDialogApi {
     return 'dialog';
   }
 
-  public override get stack() {
-    return [];
-  }
-
   public override get layer(): GuiLayer {
     return GuiLayer.Dialog;
   }

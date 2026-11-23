@@ -26,10 +26,6 @@ export class GuiWorld extends GuiApsect implements GuiWorldApi {
     return 'world';
   }
 
-  public override get stack() {
-    return [];
-  }
-
   public override get layer(): GuiLayer {
     return GuiLayer.World;
   }

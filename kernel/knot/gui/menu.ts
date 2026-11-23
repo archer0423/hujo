@@ -26,10 +26,6 @@ export class GuiMenu extends GuiApsect implements GuiMenuApi {
     return 'menu';
   }
 
-  public override get stack() {
-    return [];
-  }
-
   public override get layer(): GuiLayer {
     return GuiLayer.Menu;
   }

@@ -25,10 +25,6 @@ export class GuiTransition extends GuiApsect implements GuiTransitionApi {
     return 'transition';
   }
 
-  public override get stack() {
-    return [];
-  }
-
   public override get layer(): GuiLayer {
     return GuiLayer.Transition;
   }

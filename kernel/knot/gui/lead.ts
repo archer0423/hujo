@@ -25,10 +25,6 @@ export class GuiLead extends GuiApsect implements GuiLeadApi {
     return 'lead';
   }
 
-  public override get stack() {
-    return [];
-  }
-
   public override get layer(): GuiLayer {
     return GuiLayer.Lead;
   }
