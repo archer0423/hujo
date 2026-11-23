@@ -20,7 +20,7 @@ import { CargoRemoteApi } from './remote';
 import { CargoDigest, CargoDynamicURI, CargoRemoteURI, CargoURI } from './typings';
 import { ParseCargoURI } from './util';
 
-/** 资产管理选项 */
+/** 资产管理配置 */
 export interface CargoOptions extends KnotOptions {}
 
 /** 资产管理接口 */

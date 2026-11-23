@@ -24,7 +24,7 @@ class IoC {
   /**
    * 注册结点
    * @param ctor 结点构造
-   * @param options 结点选项
+   * @param options 结点配置
    */
   public register<K extends Knot>(ctor: KnotCtor<K>, options: K['options']) {
     const trait = ctor.prototype.trait;

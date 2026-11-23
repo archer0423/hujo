@@ -15,7 +15,7 @@ import { Range } from './digit';
 /**
  * 水平布局
  * @param container 容器
- * @param options 选项
+ * @param options 配置
  * @param options.PaddingLeft 左边距，默认 0
  * @param options.PaddingRight 右边距，默认 0
  * @param options.PaddingTop 上边距，默认 0
@@ -36,7 +36,7 @@ export function LayoutHorizontal(
     Direction?: 'Forward' | 'Backward';
   },
 ) {
-  // 初始化选项
+  // 初始化配置
   options = {
     PaddingLeft: 0,
     PaddingRight: 0,
@@ -114,7 +114,7 @@ export function LayoutHorizontal(
 /**
  * 垂直布局
  * @param container 容器
- * @param options 选项
+ * @param options 配置
  * @param options.PaddingLeft 左边距，默认 0
  * @param options.PaddingRight 右边距，默认 0
  * @param options.PaddingTop 上边距，默认 0
@@ -135,7 +135,7 @@ export function LayoutVertical(
     Direction?: 'Forward' | 'Backward';
   },
 ) {
-  // 初始化选项
+  // 初始化配置
   options = {
     PaddingLeft: 0,
     PaddingRight: 0,
@@ -213,7 +213,7 @@ export function LayoutVertical(
 /**
  * 流式布局
  * @param container 容器
- * @param options 选项
+ * @param options 配置
  * @param options.MaxWidth 最大宽度，默认 0
  * @param options.LineHeight 行高，默认 20
  * @param options.PaddingLeft 左边距，默认 0
@@ -240,7 +240,7 @@ export function LayoutFlow(
     Direction?: 'Forward' | 'Backward';
   },
 ) {
-  // 初始化选项
+  // 初始化配置
   options = {
     PaddingLeft: 0,
     PaddingRight: 0,
@@ -374,7 +374,7 @@ export function LayoutFlow(
 /**
  * 网格布局
  * @param container 容器
- * @param options 选项
+ * @param options 配置
  * @param options.PaddingLeft 左边距，默认 0
  * @param options.PaddingRight 右边距，默认 0
  * @param options.PaddingTop 上边距，默认 0
@@ -401,7 +401,7 @@ export function LayoutGrid(
     Direction?: 'horizontal' | 'vertical';
   } = {},
 ) {
-  // 初始化选项
+  // 初始化配置
   options = {
     PaddingLeft: 0,
     PaddingRight: 0,

@@ -37,7 +37,7 @@ import { CargoRegistryApi } from './registry';
 import { CargoLoadItem, CargoLoadState, CargoRemoteURI } from './typings';
 import { ParseCargoURI } from './util';
 
-/** 远程加载器选项 */
+/** 远程加载器配置 */
 export interface CargoRemoteOptions extends KnotOptions {
   /** 资源服务器地址 */
   url: string;

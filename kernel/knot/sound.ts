@@ -90,8 +90,8 @@ export interface SoundApi extends KnotApi<SoundOptions> {
   /** 音乐主音量（播放中实例不热更新，对下一次播放生效） */
   musicVolume: number;
   /**
-   * 注册音频播放选项信息
-   * @param options 音频播放选项
+   * 注册音频播放配置信息
+   * @param options 音频播放配置
    */
   register(registry: SoundRegistry): void;
   /**

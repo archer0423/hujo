@@ -12,7 +12,7 @@ import { Knot, KnotApi, KnotOptions } from '../../core/knot';
 import { CargoItem, CargoURI } from './typings';
 import { IsValidCargoURI } from './util';
 
-/** 资产注册表选项 */
+/** 资产注册表配置 */
 export interface CargoRegistryOptions extends KnotOptions {
   /** 资产默认存活时间 */
   ttl?: number;

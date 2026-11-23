@@ -17,7 +17,7 @@ import { CargoRegistryApi } from './registry';
 import { CargoDynamicURI, CargoLoadItem, CargoLoadState, CargoURI } from './typings';
 import { GetCargoFactory, IsValidCargoURI, ParseCargoURI } from './util';
 
-/** 动态加载器选项 */
+/** 动态加载器配置 */
 export interface CargoDynamicOptions extends KnotOptions {}
 
 /** 动态加载器接口 */

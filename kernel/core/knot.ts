@@ -11,7 +11,7 @@
 import { Action, ActionResult } from '../cord/action';
 import { journal, JournalLogger } from './journal';
 
-/** 结点选项 */
+/** 结点配置 */
 export interface KnotOptions {}
 
 /** 结点构造 */
@@ -22,7 +22,7 @@ export interface KnotCtor<K extends Knot> {
 
 /** 结点接口 */
 export interface KnotApi<P extends KnotOptions> {
-  /** 选项（在连接完成后转换为不可变对象） */
+  /** 配置（在连接完成后转换为不可变对象） */
   options: Readonly<P>;
   /** 依赖 */
   deps: Readonly<string[]>;
@@ -36,7 +36,7 @@ export interface KnotApi<P extends KnotOptions> {
   readonly detached: boolean;
   /**
    * 连接结点
-   * @param options 选项
+   * @param options 配置
    */
   link(options: P): void;
   /** 连接 */

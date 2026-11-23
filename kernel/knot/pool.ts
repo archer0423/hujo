@@ -12,7 +12,7 @@ import { journal } from '../core/journal';
 import { Knot, KnotApi, KnotOptions } from '../core/knot';
 import { RunSync } from '../skill/might';
 
-/** 对象池选项 */
+/** 对象池配置 */
 export interface PoolItemOptions<T> {
   /** 对象工厂（必填，创建新对象；必须返回对象类型，原始值会令 WeakSet.add 抛错；异常向上传播由调用方感知） */
   factory: () => T;
@@ -141,7 +141,7 @@ class PoolItem<T> implements PoolItemApi<T> {
    * 对象池构造
    * @tip 仅经 PoolPlugin.Acquire 创建，轻量校验防内部误用
    * @param trait 池名
-   * @param options 池选项
+   * @param options 池配置
    */
   public constructor(trait: string, options: PoolItemOptions<T>) {
     if (typeof options.factory !== 'function') {
@@ -380,7 +380,7 @@ class PoolItem<T> implements PoolItemApi<T> {
 
   /** 池名 */
   private readonly __trait: string;
-  /** 池选项（容量与安全水位已解析为确定值） */
+  /** 池配置（容量与安全水位已解析为确定值） */
   private readonly __options: PoolItemOptions<T>;
   /** 安全水位 */
   private readonly __safeIdle: number;
@@ -504,7 +504,7 @@ class Pool extends Knot<PoolOptions> implements PoolApi {
    * 幂等创建/获取命名池
    * @tip 重复 trait 返回已存在池并忽略新 options
    * @param trait 池标识
-   * @param options 池选项
+   * @param options 池配置
    */
   public acquire<T>(trait: string, options: PoolItemOptions<T>): PoolItemApi<T> {
     const existing = this.__pools.get(trait);

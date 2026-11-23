@@ -8,7 +8,7 @@
  * Copyright (c) 2026 archer0423
  *******************************************/
 
-/** RGB(A) 选项 */
+/** RGB(A) 配置 */
 export interface RgbaOptions {
   /**
 	The RGB output format.
