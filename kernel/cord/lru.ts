@@ -26,6 +26,12 @@ export interface LRUNode<K, V> {
 export class LRU<K, V> {
   // public
 
+  /** 节点被添加时回调 */
+  public onAppended?: (value: V) => void;
+
+  /** 节点被移除时回调 */
+  public onRemoved?: (value: V) => void;
+
   public constructor(capacity: number) {
     // Number.isInteger 一并拦截 NaN / Infinity / 小数：NaN 时 size > NaN 恒为 false，缓存永不淘汰
     if (!Number.isInteger(capacity) || capacity <= 0) {
@@ -221,6 +227,7 @@ export class LRU<K, V> {
     }
 
     this.__head = node;
+    this.onAppended?.(node.value);
 
     if (!this.__tail) {
       this.__tail = node;
@@ -264,6 +271,7 @@ export class LRU<K, V> {
     }
 
     this.__cache.delete(this.__tail.key);
+    this.onRemoved?.(this.__tail.value);
     this.__removeNode(this.__tail);
   }
 }
