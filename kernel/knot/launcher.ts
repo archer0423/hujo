@@ -258,14 +258,15 @@ export class Launcher extends Knot<LauncherOptions> implements LauncherApi {
 
     this.options = options;
 
-    director.once(Director.EVENT_BEFORE_SCENE_LAUNCH, this.__onSceneLaunch, this);
-    game.on(Game.EVENT_SHOW, this.__internalResume, this);
-    game.on(Game.EVENT_HIDE, this.__internalPause, this);
-    game.on(Game.EVENT_CLOSE, this.__internalClose, this);
-    game.on(Game.EVENT_LOW_MEMORY, this.__internalLowMemory, this);
-    this.logger.info(`🔥 ${this.app} ${this.version}_${this.build}`);
-
-    return Promise.resolve(true);
+    return new Promise<boolean>((resolve) => {
+      director.once(Director.EVENT_BEFORE_SCENE_LAUNCH, this.__onSceneLaunch, this);
+      director.once(Director.EVENT_BEFORE_SCENE_LAUNCH, resolve, this);
+      game.on(Game.EVENT_SHOW, this.__internalResume, this);
+      game.on(Game.EVENT_HIDE, this.__internalPause, this);
+      game.on(Game.EVENT_CLOSE, this.__internalClose, this);
+      game.on(Game.EVENT_LOW_MEMORY, this.__internalLowMemory, this);
+      this.logger.info(`🔥 ${this.app} ${this.version}_${this.build}`);
+    });
   }
 
   protected _detach(): Promise<boolean> {
@@ -365,8 +366,8 @@ export class Launcher extends Knot<LauncherOptions> implements LauncherApi {
     ctx.stage = stage;
 
     // CameraUi
-    const cameraUi = this.root.getChildByName('Camera')?.getComponent(Camera) ?? null;
-    if (!this.cameraUi) {
+    const cameraUi = root.getChildByName('Camera')?.getComponent(Camera) ?? null;
+    if (!cameraUi) {
       throw new Error('Canvas 缺少名为 Camera 的子节点，UI 相机不可用');
     }
     ctx.cameraUi = cameraUi!;

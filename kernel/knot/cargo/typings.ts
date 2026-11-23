@@ -74,6 +74,10 @@ export type CargoDynamicURI = `${string}@${string}#${CargoType}`;
 /** 远程资产标识（构成） */
 export type CargoRemoteURI = `remote@${string}#${CargoType}.${string}`;
 
+interface GuiFactory {
+  new (node: Node): GuiViewApi;
+}
+
 /** 资产信息 */
 export type CargoItem = {
   /** 资产标识 */
@@ -87,7 +91,7 @@ export type CargoItem = {
   /** 是否支持 LRU 缓存 */
   lru?: boolean;
   /** 视图工厂 */
-  factory?: (node: Node) => GuiViewApi;
+  factory?: GuiFactory;
   /** 视图结构 */
   schema?: GuiStructSchema;
 };

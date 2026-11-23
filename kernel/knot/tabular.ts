@@ -315,7 +315,7 @@ function parseSheet(
  * - 查询结果缓存：解析结果缓存、字段键值索引缓存、条件过滤缓存（Where 依赖 filter 引用复用命中）
  * - 配置表数据只读：注册时冻结源数据，解析后深度冻结，任何操作均不修改或删除数据
  */
-class Tabular extends Knot<TabularOptions> implements TabularApi {
+export class Tabular extends Knot<TabularOptions> implements TabularApi {
   // public
 
   public get trait(): string {

@@ -8,7 +8,7 @@
  * Copyright (c) 2026 archer0423
  *******************************************/
 
-import { BlockInputEvents, Widget } from 'cc';
+import { Widget } from 'cc';
 
 import { GuiApsect, GuiApsectApi, GuiApsectOptions } from './layer';
 import { CargoGuiURI, GuiLayer } from './typings';
@@ -44,7 +44,6 @@ export class GuiAlert extends GuiApsect implements GuiAlertApi {
 
   protected override _onDidAttach(): void {
     const wid = this._root.addComponent(Widget);
-    this._root.addComponent(BlockInputEvents);
     wid.target = this._root.parent;
     wid.left = wid.top = wid.right = wid.bottom = 0;
     wid.isAlignLeft = wid.isAlignTop = wid.isAlignBottom = wid.isAlignRight = true;

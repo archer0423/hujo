@@ -476,7 +476,7 @@ class PoolItem<T> implements PoolItemApi<T> {
  *
  * 按 trait 管理多个命名池，池的唯一创建入口
  */
-class Pool extends Knot<PoolOptions> implements PoolApi {
+export class Pool extends Knot<PoolOptions> implements PoolApi {
   // public
 
   public constructor() {

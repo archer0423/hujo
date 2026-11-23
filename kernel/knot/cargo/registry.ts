@@ -25,9 +25,9 @@ export interface CargoRegistryApi extends KnotApi<CargoRegistryOptions> {
   /** 查询资产 */
   get(uri: CargoURI): CargoItem | undefined;
   /** 注册资产 */
-  register<P extends CargoItem>(item: P): void;
+  register(item: CargoItem): void;
   /** 批量注册资产 */
-  registerBatch<P extends CargoItem>(items: P[]): void;
+  registerBatch(items: CargoItem[]): void;
 }
 
 /** 资产注册表结点 */
@@ -70,7 +70,7 @@ export class CargoRegistry extends Knot<CargoRegistryOptions> implements CargoRe
     this.__registry.set(uri, item);
   }
 
-  public registerBatch<P extends CargoItem>(items: P[]): void {
+  public registerBatch(items: CargoItem[]): void {
     for (const item of items) {
       this.register(item);
     }

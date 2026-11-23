@@ -11,6 +11,7 @@
 import { js, Component, Constructor, Layers, Node, UITransform } from 'cc';
 
 import { Knot, KnotApi, KnotOptions } from '../../core/knot';
+import { Launcher } from '../launcher';
 import { GuiApi } from './gui';
 import { CargoGuiURI, GuiLayer, GuiSchema, GuiStructSchema } from './typings';
 import { GuiViewApi } from './view';
@@ -20,6 +21,8 @@ export interface GuiApsectOptions extends KnotOptions {}
 
 /** 视图层切片接口 */
 export interface GuiApsectApi extends KnotApi<GuiApsectOptions> {
+  /** 指定资产标识的视图是否已打开 */
+  isOpen(uri: CargoGuiURI): boolean;
   /**
    * 打开视图前置校验
    * @param uri 视图资产标识
@@ -57,6 +60,7 @@ export interface GuiApsectApi extends KnotApi<GuiApsectOptions> {
 export abstract class GuiApsect extends Knot<GuiApsectOptions> implements GuiApsectApi {
   // public
 
+  declare public readonly launcher: Launcher;
   declare public readonly gui: GuiApi;
 
   /** 视图结构 */
@@ -71,7 +75,7 @@ export abstract class GuiApsect extends Knot<GuiApsectOptions> implements GuiAps
   public abstract get layer(): GuiLayer;
 
   public override get deps(): string[] {
-    return ['gui'];
+    return ['gui', 'launcher'];
   }
 
   public get stack(): GuiViewApi[] {
@@ -86,6 +90,15 @@ export abstract class GuiApsect extends Knot<GuiApsectOptions> implements GuiAps
     return this._openList.size;
   }
 
+  public isOpen(uri: CargoGuiURI) {
+    for (const [, view] of this._openList) {
+      if (view.uri === uri) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public abstract preOpen(uri: CargoGuiURI): Promise<boolean>;
   public abstract preClose(view: GuiViewApi): Promise<boolean>;
 
@@ -95,7 +108,7 @@ export abstract class GuiApsect extends Knot<GuiApsectOptions> implements GuiAps
     for (const alias in struct) {
       const [path, ctor] = struct[alias];
       const name = js.getClassName(ctor);
-      const node = view.root.getChildByPath(path);
+      const node = path === '' || path === '.' ? view.root : view.root.getChildByPath(path);
       if (!node) {
         schema[alias] = undefined;
         this.logger.warn(`节点不存在 >>> ${alias} | ${view.uri}/${path}`);
@@ -160,6 +173,7 @@ export abstract class GuiApsect extends Knot<GuiApsectOptions> implements GuiAps
     root.layer = Layers.BitMask.UI_2D;
     root.addComponent(UITransform);
     this._root = root;
+    this.launcher.stage.addChild(root);
 
     this._onDidAttach();
 

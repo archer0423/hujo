@@ -1,5 +1,6 @@
 import { Node } from 'cc';
 
+import { JournalLogger } from '../../core/journal';
 import { CargoGuiURI, GuiLayer } from './typings';
 
 /** Gui 视图接口 */
@@ -12,6 +13,8 @@ export interface GuiViewApi {
   layer: GuiLayer;
   /** 编号（添加到层时由层分配） */
   id: number;
+  /** 专属日志记录器 */
+  get logger(): JournalLogger;
   /** 打开视图 */
   open(strategy: 'init' | 'focus', args: Record<string, unknown>): Promise<void>;
   /** 尝试关闭视图（自身） */

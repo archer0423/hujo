@@ -8,7 +8,7 @@
  * Copyright (c) 2026 archer0423
  *******************************************/
 
-import { BlockInputEvents, Widget } from 'cc';
+import { Widget } from 'cc';
 
 import { GuiApsect, GuiApsectApi, GuiApsectOptions } from './layer';
 import { CargoGuiURI, GuiLayer } from './typings';
@@ -33,6 +33,10 @@ export class GuiDialog extends GuiApsect implements GuiDialogApi {
   }
 
   public override async preOpen(uri: CargoGuiURI): Promise<boolean> {
+    if (this.isOpen(uri)) {
+      return Promise.resolve(false);
+    }
+
     return Promise.resolve(true);
   }
 
@@ -44,7 +48,6 @@ export class GuiDialog extends GuiApsect implements GuiDialogApi {
 
   protected override _onDidAttach(): void {
     const wid = this._root.addComponent(Widget);
-    this._root.addComponent(BlockInputEvents);
     wid.target = this._root.parent;
     wid.left = wid.top = wid.right = wid.bottom = 0;
     wid.isAlignLeft = wid.isAlignTop = wid.isAlignBottom = wid.isAlignRight = true;

@@ -94,7 +94,7 @@ export class Cargo extends Knot<CargoOptions> implements CargoApi {
   }
 
   public override get deps() {
-    return ['registry'];
+    return ['registry', 'dynamic', 'remote'];
   }
 
   public has(uri: CargoURI) {

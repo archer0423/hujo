@@ -10,6 +10,7 @@
 
 import { LRU } from '../../cord/lru';
 import { Knot, KnotApi, KnotOptions } from '../../core/knot';
+import { SetProperty } from '../../skill/dict';
 import { Cargo } from '../cargo/cargo';
 import { CargoRegistryApi } from '../cargo/registry';
 import { IsTargetedCargoURI } from '../cargo/util';
@@ -102,7 +103,7 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
       'dialog',
       'toast',
       'trumpet',
-      'guide',
+      'lead',
       'load',
       'transition',
       'alert',
@@ -120,7 +121,7 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
       return Promise.resolve(false);
     }
 
-    const top = stack[stack.length];
+    const top = stack[stack.length - 1];
     return this.close(top);
   }
 
@@ -130,6 +131,12 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
     }
 
     const promise = this.__open(uri, args);
+    promise.then((ok) => {
+      if (ok) {
+        this.focus();
+      }
+      this.__requests.delete(uri);
+    });
     this.__requests.set(uri, promise);
     return promise;
   }
@@ -313,7 +320,7 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
       return Promise.resolve(false);
     }
 
-    const { layer, factory, schema } = this.registry.get(uri)!;
+    const { layer, factory, schema, alias } = this.registry.get(uri)!;
 
     // 视图层级打开的前置校验
     const layerInst = this.__getLayerOf(layer!)!;
@@ -344,12 +351,14 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
 
     // 实例化资产
     const root = this.cargo.instantiate(uri)!;
-    const view = factory!(root);
+    const view = new factory!(root);
+    SetProperty(view, 'root', root);
+    SetProperty(view, 'uri', uri);
+    SetProperty(view, 'alias', alias);
+    SetProperty(view, 'layer', layer);
+
     await layerInst.didOpen(view, schema!);
     await view.open('init', args);
-
-    // 移除请求
-    this.__requests.delete(view.uri);
 
     return Promise.resolve(true);
   }

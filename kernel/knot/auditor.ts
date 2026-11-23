@@ -173,7 +173,7 @@ class ACAutomaton {
     }
 
     let current = this.__root;
-    const chars = Array.from(this.__normalize(word)); // 归一后分词(IgnoreCase 关闭时原样返回)
+    const chars = Array.from(this.__normalize(word)); // 归一后分词(ignoreCase 关闭时原样返回)
 
     for (const char of chars) {
       let child = current.children.get(char);
@@ -189,7 +189,7 @@ class ACAutomaton {
       current = child;
     }
 
-    // 归一后同一路径只保留首词：IgnoreCase 下 "abc"/"ABC" 共享路径，
+    // 归一后同一路径只保留首词：ignoreCase 下 "abc"/"ABC" 共享路径，
     // 变体重复入表会让 Match 对同一区间输出多条重复结果（下游命中计数虚高）
     if (current.words.length === 0) {
       current.words.push(word);
@@ -609,9 +609,9 @@ export class Auditor extends Knot<AuditorOptions> implements AuditorApi {
 
     // 默认值填充
     Override(cfg, {
-      Replacement: '█',
-      IgnoreCase: false,
-      CacheSize: 1000,
+      replacement: '█',
+      ignoreCase: false,
+      cacheSize: 1000,
     });
 
     // 缓存容量须为正整数：无论是否启用缓存都在构造期校验，配置错误不留到运行期

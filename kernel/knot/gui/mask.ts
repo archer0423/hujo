@@ -52,9 +52,13 @@ export class GuiMask extends Knot<GuiMaskOptions> implements GuiMaskApi {
   }
 
   public show(view: GuiViewApi): void {
+    if (!view || this.__view === view) {
+      return;
+    }
+
     this.__view = view;
     this._root!.active = true;
-    view.root.parent!.insertChild(this._root!, view.root.getSiblingIndex());
+    view.root.parent!.insertChild(this._root!, Math.max(0, view.root.getSiblingIndex() - 1));
     this._root!.active = true;
     this.__repaint();
   }
@@ -72,6 +76,7 @@ export class GuiMask extends Knot<GuiMaskOptions> implements GuiMaskApi {
   protected override _attach(): Promise<boolean> {
     this.options.color ??= '#00000088';
     const root = new Node('mask');
+    this.launcher.stage.addChild(root);
     const wid = root.addComponent(Widget);
     root.addComponent(Graphics);
     root.layer = Layers.BitMask.UI_2D;
@@ -86,7 +91,6 @@ export class GuiMask extends Knot<GuiMaskOptions> implements GuiMaskApi {
     root.on(Node.EventType.TOUCH_CANCEL, this.__onTouchCancel, this, true);
     root.on(Node.EventType.TOUCH_END, this.__onTouchEnd, this, true);
     root.active = false;
-    this.launcher.stage.addChild(root);
     this._root = root;
 
     this.hide();
