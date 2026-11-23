@@ -45,6 +45,8 @@ export interface GuiApsectApi extends KnotApi<GuiApsectOptions> {
   closeAll(): Promise<void>;
   /** 视图堆栈 */
   get stack(): GuiViewApi[];
+  /** 顶层视图 */
+  get top(): GuiViewApi | undefined;
   /** 所属层级 */
   get layer(): GuiLayer;
   /** 视图堆栈深度 */
@@ -74,6 +76,10 @@ export abstract class GuiApsect extends Knot<GuiApsectOptions> implements GuiAps
 
   public get stack(): GuiViewApi[] {
     return [...this._openList.values()];
+  }
+
+  public get top() {
+    return this.stack.pop();
   }
 
   public get depth(): number {
@@ -109,23 +115,27 @@ export abstract class GuiApsect extends Knot<GuiApsectOptions> implements GuiAps
     }
     this.schema = Object.freeze(schema);
 
-    // 添加视图
+    // 添加视图：视图动画与预备
     const id = ++this.__id;
     view.id = id;
+    view.layer = this.layer;
     this._openList.set(id, view);
     this._root.addChild(view.root);
-
-    // 视图动画与预备
+    await this._onDidOpenBegan(view);
     await view.onEnterBegan();
     await view.onEnterEnded();
+    await this._onDidOpenEnded(view);
 
     return Promise.resolve();
   }
 
   public async didClose(view: GuiViewApi) {
+    // 移除视图：视图动画与清理
     this._openList.delete(view.id);
+    await this._onDidCloseBegan(view);
     await view.onExitBegan();
     await view.onExitEnded();
+    await this._onDidCloseEnded(view);
     view.root.removeFromParent();
 
     return Promise.resolve(view);
@@ -151,11 +161,33 @@ export abstract class GuiApsect extends Knot<GuiApsectOptions> implements GuiAps
     root.addComponent(UITransform);
     this._root = root;
 
+    this._onDidAttach();
+
     return Promise.resolve(true);
   }
 
   protected _detach(): Promise<boolean> {
     return Promise.resolve(true);
+  }
+
+  /** 视图层级就绪回调 */
+  protected _onDidAttach() {}
+
+  /** 视图打开回调（进入前） */
+  protected _onDidOpenBegan(view: GuiViewApi): Promise<void> {
+    return Promise.resolve();
+  }
+  /** 视图打开回调（进入后） */
+  protected _onDidOpenEnded(view: GuiViewApi): Promise<void> {
+    return Promise.resolve();
+  }
+  /** 视图关闭回调（退出前） */
+  protected _onDidCloseBegan(view: GuiViewApi): Promise<void> {
+    return Promise.resolve();
+  }
+  /** 视图关闭回调（退出后） */
+  protected _onDidCloseEnded(view: GuiViewApi): Promise<void> {
+    return Promise.resolve();
   }
 
   // private

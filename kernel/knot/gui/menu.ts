@@ -31,6 +31,9 @@ export class GuiMenu extends GuiApsect implements GuiMenuApi {
   }
 
   public override async preOpen(uri: CargoGuiURI): Promise<boolean> {
+    // 同时只能存在一个主菜单
+    await this.top?.close();
+
     return Promise.resolve(true);
   }
 
@@ -39,6 +42,12 @@ export class GuiMenu extends GuiApsect implements GuiMenuApi {
   }
 
   // protected
+
+  protected override async _onDidOpenBegan(view: GuiViewApi): Promise<void> {
+    await this.gui.closeLayer(GuiLayer.Dialog);
+    await this.gui.closeLayer(GuiLayer.Popup);
+    await this.gui.closeLayer(GuiLayer.Screen);
+  }
 
   // private
 }

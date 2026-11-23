@@ -1,6 +1,6 @@
 import { Node } from 'cc';
 
-import { CargoGuiURI } from './typings';
+import { CargoGuiURI, GuiLayer } from './typings';
 
 /** Gui 视图接口 */
 export interface GuiViewApi {
@@ -8,6 +8,8 @@ export interface GuiViewApi {
   readonly uri: CargoGuiURI;
   /** 视图根节点 */
   readonly root: Node;
+  /** 视图所属层级 */
+  layer: GuiLayer;
   /** 编号（添加到层时由层分配） */
   id: number;
   /** 打开视图 */
@@ -26,4 +28,6 @@ export interface GuiViewApi {
   onExitBegan(): Promise<void>;
   /** 退出结束回调 */
   onExitEnded(): Promise<void>;
+  /** 点击到外部回调 */
+  onHitOutside(): void;
 }

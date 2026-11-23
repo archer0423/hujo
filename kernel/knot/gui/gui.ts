@@ -17,6 +17,7 @@ import { GuiAlertApi } from './alert';
 import { GuiDialogApi } from './dialog';
 import { GuiLeadApi } from './lead';
 import { GuiLoadApi } from './load';
+import { GuiMaskApi } from './mask';
 import { GuiMenuApi } from './menu';
 import { GuiPopupApi } from './popup';
 import { GuiScreenApi } from './screen';
@@ -30,7 +31,7 @@ import { GuiWorldApi } from './world';
 
 /** Gui 系统配置 */
 export interface GuiOotions extends KnotOptions {
-  /** LRU 缓存上限 */
+  /** LRU 缓存上限（默认 3） */
   lru?: number;
 }
 
@@ -46,8 +47,17 @@ export interface GuiApi extends KnotApi<GuiOotions> {
    * @param view 视图
    */
   close(view: GuiViewApi): Promise<boolean>;
+  /**
+   * 关闭视图层级
+   * @param layer 视图层级
+   */
+  closeLayer(layer: GuiLayer): Promise<void>;
   /** 返回 */
   back(): Promise<boolean>;
+  /** 聚焦到下一个顶层视图 */
+  focus(): void;
+  /** 使上一个顶层视图失焦 */
+  blur(): void;
 }
 
 /** Gui 系统结点 */
@@ -56,6 +66,7 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
 
   declare public readonly cargo: Cargo;
   declare public readonly registry: CargoRegistryApi;
+  declare public readonly mask: GuiMaskApi;
   declare public readonly world: GuiWorldApi;
   declare public readonly menu: GuiMenuApi;
   declare public readonly screen: GuiScreenApi;
@@ -83,6 +94,7 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
     return [
       'cargo',
       'registry',
+      'mask',
       'world',
       'menu',
       'screen',
@@ -146,7 +158,47 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
       this.cargo.deinstantiate(view.root);
     }
 
+    // 聚焦到下一个顶层视图
+    this.focus();
+
     return Promise.resolve(true);
+  }
+
+  public async closeLayer(layer: GuiLayer): Promise<void> {
+    const layerInst = this.__getLayerOf(layer);
+    if (layerInst) {
+      return layerInst.closeAll();
+    }
+  }
+
+  public focus() {
+    if (this.alert.depth) {
+      this.alert.top!.focus();
+      this.mask.show(this.alert.top!);
+    } else if (this.dialog.depth) {
+      this.dialog.top!.focus();
+      this.mask.show(this.dialog.top!);
+    } else if (this.popup.depth) {
+      this.popup.top!.focus();
+      this.mask.show(this.popup.top!);
+    } else if (this.menu.depth) {
+      this.menu.top!.focus();
+      this.mask.show(this.menu.top!);
+    } else {
+      this.mask.hide();
+    }
+  }
+
+  public blur() {
+    if (this.alert.depth) {
+      this.alert.top!.blur();
+    } else if (this.dialog.depth) {
+      this.dialog.top!.blur();
+    } else if (this.popup.depth) {
+      this.popup.top!.blur();
+    } else if (this.menu.depth) {
+      this.menu.top!.blur();
+    }
   }
 
   // protected
@@ -286,6 +338,9 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
       this.logger.warn(`视图资产加载失败 >>> ${uri}`);
       return Promise.resolve(false);
     }
+
+    // 使上一个顶层视图失焦
+    this.blur();
 
     // 实例化资产
     const root = this.cargo.instantiate(uri)!;

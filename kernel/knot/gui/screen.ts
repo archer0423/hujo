@@ -7,17 +7,19 @@
  * ╚═╝  ╚═╝  ╚═════╝   ╚════╝   ╚═════╝
  * Copyright (c) 2026 archer0423
  *******************************************/
+import { BlockInputEvents, Widget } from 'cc';
+
 import { GuiApsect, GuiApsectApi, GuiApsectOptions } from './layer';
 import { CargoGuiURI, GuiLayer } from './typings';
 import { GuiViewApi } from './view';
 
-/** 窗口层配置 */
+/** 全屏窗口层配置 */
 export interface GuiScreenOptions extends GuiApsectOptions {}
 
-/** 窗口层接口 */
+/** 全屏窗口层接口 */
 export interface GuiScreenApi extends GuiApsectApi {}
 
-/** 窗口层结点 */
+/** 全屏窗口层结点 */
 export class GuiScreen extends GuiApsect implements GuiScreenApi {
   // public
 
@@ -30,6 +32,9 @@ export class GuiScreen extends GuiApsect implements GuiScreenApi {
   }
 
   public override async preOpen(uri: CargoGuiURI): Promise<boolean> {
+    // 同时只能存在一个全屏窗口
+    await this.top?.close();
+
     return Promise.resolve(true);
   }
 
@@ -38,6 +43,21 @@ export class GuiScreen extends GuiApsect implements GuiScreenApi {
   }
 
   // protected
+
+  protected override _onDidAttach(): void {
+    const wid = this._root.addComponent(Widget);
+    this._root.addComponent(BlockInputEvents);
+    wid.target = this._root.parent;
+    wid.left = wid.top = wid.right = wid.bottom = 0;
+    wid.isAlignLeft = wid.isAlignTop = wid.isAlignBottom = wid.isAlignRight = true;
+    wid.alignMode = Widget.AlignMode.ON_WINDOW_RESIZE;
+    wid.updateAlignment();
+  }
+
+  protected override async _onDidOpenBegan(view: GuiViewApi): Promise<void> {
+    await this.gui.closeLayer(GuiLayer.Dialog);
+    await this.gui.closeLayer(GuiLayer.Popup);
+  }
 
   // private
 }

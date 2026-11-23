@@ -30,6 +30,9 @@ export class GuiLead extends GuiApsect implements GuiLeadApi {
   }
 
   public override async preOpen(uri: CargoGuiURI): Promise<boolean> {
+    // 同时只能存在一个新手引导步骤
+    await this.top?.close();
+
     return Promise.resolve(true);
   }
 

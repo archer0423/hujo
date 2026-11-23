@@ -30,7 +30,8 @@ export class GuiTop extends GuiApsect implements GuiTopApi {
   }
 
   public override async preOpen(uri: CargoGuiURI): Promise<boolean> {
-    return Promise.resolve(true);
+    // Top 不允许添加任意视图
+    return Promise.resolve(false);
   }
 
   public override async preClose(view: GuiViewApi): Promise<boolean> {
