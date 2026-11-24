@@ -13,7 +13,7 @@ import { MISC } from '../skill/env';
 import { RunSync } from '../skill/might';
 
 /** Cocos Creator Spider */
-interface CCSpider {
+export interface CCSpider {
   /**
    * 获取字段
    * @param trait 字段名称
@@ -99,9 +99,9 @@ export interface SpiderApi extends KnotApi<SpiderOptions> {
   /** 功能是否可用 */
   get available(): boolean;
   /** 显示面板 */
-  showPanel(): void;
+  show(): void;
   /** 隐藏面板 */
-  hidePanel(): void;
+  hide(): void;
   /** 添加字段（Spider 不可用时拒绝并告警） */
   add(field: SpiderFields): void;
   /** 移除字段（不受可用性守卫：容器清理始终执行，面板移除经 RunSync 兜底） */
@@ -130,13 +130,13 @@ export class Spider extends Knot<SpiderOptions> implements SpiderApi {
     return MISC.BROWSER && !!this.options.spider;
   }
 
-  public showPanel(): void {
+  public show(): void {
     if (this.available) {
       this.options.spider.show();
     }
   }
 
-  public hidePanel(): void {
+  public hide(): void {
     if (this.available) {
       this.options.spider.hide();
     }
