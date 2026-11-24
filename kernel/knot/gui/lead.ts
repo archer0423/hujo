@@ -10,18 +10,18 @@
 
 import { Widget } from 'cc';
 
-import { GuiApsect, GuiApsectApi, GuiApsectOptions } from './layer';
+import { GuiLayerApsect, GuiLayerApsectApi, GuiLayerApsectOptions } from './layer';
 import { CargoGuiURI, GuiLayer } from './typings';
 import { GuiViewApi } from './view';
 
 /** 引导层配置 */
-export interface GuiLeadOptions extends GuiApsectOptions {}
+export interface GuiLeadOptions extends GuiLayerApsectOptions {}
 
 /** 引导层接口 */
-export interface GuiLeadApi extends GuiApsectApi {}
+export interface GuiLeadApi extends GuiLayerApsectApi {}
 
 /** 引导层结点 */
-export class GuiLead extends GuiApsect implements GuiLeadApi {
+export class GuiLead extends GuiLayerApsect implements GuiLeadApi {
   // public
 
   public override get trait(): string {

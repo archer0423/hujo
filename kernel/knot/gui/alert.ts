@@ -10,18 +10,18 @@
 
 import { Widget } from 'cc';
 
-import { GuiApsect, GuiApsectApi, GuiApsectOptions } from './layer';
+import { GuiLayerApsect, GuiLayerApsectApi, GuiLayerApsectOptions } from './layer';
 import { CargoGuiURI, GuiLayer } from './typings';
 import { GuiViewApi } from './view';
 
 /** 紧急模态弹窗层配置 */
-export interface GuiAlertOptions extends GuiApsectOptions {}
+export interface GuiAlertOptions extends GuiLayerApsectOptions {}
 
 /** 紧急模态弹窗层接口 */
-export interface GuiAlertApi extends GuiApsectApi {}
+export interface GuiAlertApi extends GuiLayerApsectApi {}
 
 /** 紧急模态弹窗层结点 */
-export class GuiAlert extends GuiApsect implements GuiAlertApi {
+export class GuiAlert extends GuiLayerApsect implements GuiAlertApi {
   // public
 
   public override get trait(): string {

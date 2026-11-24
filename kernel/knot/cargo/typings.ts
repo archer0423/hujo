@@ -8,10 +8,10 @@
  * Copyright (c) 2026 archer0423
  *******************************************/
 
-import { Asset, Node } from 'cc';
+import { Asset, Constructor } from 'cc';
 
-import { GuiLayer, GuiStructSchema } from '../gui/typings';
-import { GuiViewApi } from '../gui/view';
+import { CargoGuiURI, GuiLayer, GuiStructSchema } from '../gui/typings';
+import { GuiPresenter, GuiView } from '../gui/view';
 
 /** 资产构造 */
 export type CargoCtor = new (...args: any[]) => Asset;
@@ -74,12 +74,8 @@ export type CargoDynamicURI = `${string}@${string}#${CargoType}`;
 /** 远程资产标识（构成） */
 export type CargoRemoteURI = `remote@${string}#${CargoType}.${string}`;
 
-interface GuiFactory {
-  new (node: Node): GuiViewApi;
-}
-
 /** 资产信息 */
-export type CargoItem = {
+export interface CargoItem {
   /** 资产标识 */
   uri: CargoURI;
   /** 存活时间 */
@@ -90,11 +86,31 @@ export type CargoItem = {
   layer?: GuiLayer;
   /** 是否支持 LRU 缓存 */
   lru?: boolean;
-  /** 视图工厂 */
-  factory?: GuiFactory;
+  /** View 工厂 */
+  view?: Constructor<GuiView>;
+  /** Presenter 工厂 */
+  presenter?: Constructor<GuiPresenter<GuiView>>;
   /** 视图结构 */
   schema?: GuiStructSchema;
-};
+}
+
+/** 视图资产信息 */
+export interface CargoGuiItem extends CargoItem {
+  /** 资产标识 */
+  uri: CargoGuiURI;
+  /** 视图别名 */
+  alias: string;
+  /** 视图所属层级 */
+  layer: GuiLayer;
+  /** 是否支持 LRU 缓存 */
+  lru: boolean;
+  /** View 工厂 */
+  view: Constructor<GuiView>;
+  /** Presenter 工厂 */
+  presenter: Constructor<GuiPresenter<GuiView>>;
+  /** 视图结构 */
+  schema: GuiStructSchema;
+}
 
 /** 资产概要 */
 export interface CargoDigest {

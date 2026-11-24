@@ -8,19 +8,20 @@
  * Copyright (c) 2026 archer0423
  *******************************************/
 
-import { js, Component, Constructor, Layers, Node, UITransform } from 'cc';
+import { Layers, Node, UITransform } from 'cc';
 
 import { Knot, KnotApi, KnotOptions } from '../../core/knot';
+import { SetProperty } from '../../skill/dict';
 import { Launcher } from '../launcher';
 import { GuiApi } from './gui';
-import { CargoGuiURI, GuiLayer, GuiSchema, GuiStructSchema } from './typings';
+import { CargoGuiURI, GuiLayer } from './typings';
 import { GuiViewApi } from './view';
 
 /** 视图层切片配置 */
-export interface GuiApsectOptions extends KnotOptions {}
+export interface GuiLayerApsectOptions extends KnotOptions {}
 
 /** 视图层切片接口 */
-export interface GuiApsectApi extends KnotApi<GuiApsectOptions> {
+export interface GuiLayerApsectApi extends KnotApi<GuiLayerApsectOptions> {
   /** 指定资产标识的视图是否已打开 */
   isOpen(uri: CargoGuiURI): boolean;
   /**
@@ -33,7 +34,7 @@ export interface GuiApsectApi extends KnotApi<GuiApsectOptions> {
    * @param view 视图
    * @param struct 视图结构构造
    */
-  didOpen(view: GuiViewApi, struct: GuiStructSchema): Promise<void>;
+  didOpen(view: GuiViewApi): Promise<void>;
   /**
    * 关闭视图前置校验
    * @param view 视图
@@ -57,7 +58,10 @@ export interface GuiApsectApi extends KnotApi<GuiApsectOptions> {
 }
 
 /** 视图层切片结点 */
-export abstract class GuiApsect extends Knot<GuiApsectOptions> implements GuiApsectApi {
+export abstract class GuiLayerApsect
+  extends Knot<GuiLayerApsectOptions>
+  implements GuiLayerApsectApi
+{
   // public
 
   declare public readonly launcher: Launcher;
@@ -99,38 +103,13 @@ export abstract class GuiApsect extends Knot<GuiApsectOptions> implements GuiAps
   public abstract preOpen(uri: CargoGuiURI): Promise<boolean>;
   public abstract preClose(view: GuiViewApi): Promise<boolean>;
 
-  public async didOpen(view: GuiViewApi, struct: GuiStructSchema): Promise<void> {
-    // 构建视图结构
-    const schema: GuiSchema = {};
-    for (const alias in struct) {
-      const [path, ctor] = struct[alias];
-      const name = js.getClassName(ctor);
-      const node = path === '' || path === '.' ? view.root : view.root.getChildByPath(path);
-      if (!node) {
-        schema[alias] = undefined;
-        this.logger.warn(`节点不存在 >>> ${alias} | ${view.uri}/${path}`);
-        continue;
-      }
-      if (name === 'cc.Node') {
-        schema[alias] = node!;
-      } else {
-        const comp = node.getComponent(ctor as Constructor<Component>);
-        if (!comp) {
-          schema[alias] = undefined;
-          this.logger.warn(`组件不存在 >>> ${alias} | ${view.uri}/${path}@${name}`);
-          continue;
-        }
-        schema[alias] = comp;
-      }
-    }
-    view.schema = schema;
-
+  public async didOpen(view: GuiViewApi): Promise<void> {
     // 添加视图：视图动画与预备
     const id = ++this.__id;
-    view.id = id;
-    view.layer = this.layer;
+    SetProperty(view, 'id', id);
     this._openList.set(id, view);
     this._root.addChild(view.root);
+    view.build();
     await this._onDidOpenBegan(view);
     await view.onEnterBegan();
     await view.onEnterEnded();

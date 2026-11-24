@@ -42,7 +42,7 @@ export interface GuiApi extends KnotApi<GuiOotions> {
    * 打开视图
    * @param uri 视图资产标识
    */
-  open(uri: CargoGuiURI, args: Record<string, unknown>): Promise<boolean>;
+  open(uri: CargoGuiURI, args?: Record<string, unknown>): Promise<boolean>;
   /**
    * 关闭视图
    * @param view 视图
@@ -127,7 +127,7 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
     return this.close(top);
   }
 
-  public async open(uri: CargoGuiURI, args: Record<string, unknown>): Promise<boolean> {
+  public async open(uri: CargoGuiURI, args?: Record<string, unknown>): Promise<boolean> {
     if (this.__requests.has(uri)) {
       return this.__requests.get(uri)!;
     }
@@ -188,6 +188,8 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
       this.dialog.top!.focus();
     } else if (this.popup.depth) {
       this.popup.top!.focus();
+    } else if (this.screen.depth) {
+      this.screen.top!.focus();
     } else if (this.menu.depth) {
       this.menu.top!.focus();
     }
@@ -200,6 +202,8 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
       this.dialog.top!.blur();
     } else if (this.popup.depth) {
       this.popup.top!.blur();
+    } else if (this.screen.depth) {
+      this.screen.top!.blur();
     } else if (this.menu.depth) {
       this.menu.top!.blur();
     }
@@ -213,8 +217,8 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
       this.mask.show(this.dialog.top!);
     } else if (this.popup.depth) {
       this.mask.show(this.popup.top!);
-    } else if (this.menu.depth) {
-      this.mask.show(this.menu.top!);
+    } else if (this.screen.depth) {
+      this.mask.show(this.screen.top!);
     } else {
       this.mask.hide();
     }
@@ -244,52 +248,6 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
   private __requests: Map<CargoGuiURI, Promise<boolean>>;
   /** 视图缓存 */
   private __lru!: LRU<CargoGuiURI, GuiViewApi>;
-
-  /**
-   * 前置校验是否有效的视图资产
-   * @param uri 视图资产标识
-   * @returns 是否有效的视图资产
-   */
-  private __validate(uri: CargoGuiURI) {
-    if (!IsTargetedCargoURI(uri, 'prefab')) {
-      this.logger.warn(`无效的视图资产标识 >>> ${uri}`);
-      return false;
-    }
-
-    if (!this.registry.has(uri)) {
-      this.logger.warn(`视图资产未注册 >>> ${uri}`);
-      return false;
-    }
-
-    const { layer, alias, factory, schema } = this.registry.get(uri)!;
-
-    if (
-      layer === undefined ||
-      !Number.isInteger(layer) ||
-      layer < GuiLayer.World ||
-      layer > GuiLayer.Top
-    ) {
-      this.logger.warn(`视图所属层级错误 >>> ${uri}|${layer}`);
-      return false;
-    }
-
-    if (alias === undefined) {
-      this.logger.warn(`视图别名未定义 >>> ${uri}`);
-      return false;
-    }
-
-    if (factory === undefined) {
-      this.logger.warn(`视图工厂未定义 >>> ${uri}`);
-      return false;
-    }
-
-    if (schema === undefined) {
-      this.logger.warn(`视图结构未定义 >>> ${uri}`);
-      return false;
-    }
-
-    return true;
-  }
 
   /**
    * 获取视图层级结点
@@ -327,27 +285,65 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
     }
   }
 
-  private async __open(uri: CargoGuiURI, args: Record<string, unknown>) {
-    if (!this.__validate(uri)) {
+  private async __open(uri: CargoGuiURI, args?: Record<string, unknown>) {
+    // 前置校验是否有效的视图资产
+    if (!IsTargetedCargoURI(uri, 'prefab')) {
+      this.logger.warn(`无效的视图资产标识 >>> ${uri}`);
       return Promise.resolve(false);
     }
 
-    const { layer, factory, schema, alias } = this.registry.get(uri)!;
+    if (!this.registry.has(uri)) {
+      this.logger.warn(`视图资产未注册 >>> ${uri}`);
+      return Promise.resolve(false);
+    }
+
+    // 校验注册参数
+    const { layer, alias, view, presenter, schema } = this.registry.get(uri)!;
+
+    if (
+      layer === undefined ||
+      !Number.isInteger(layer) ||
+      layer < GuiLayer.World ||
+      layer > GuiLayer.Top
+    ) {
+      this.logger.warn(`视图所属层级错误 >>> ${uri}|layer(${layer})`);
+      return Promise.resolve(false);
+    }
+
+    if (alias === undefined) {
+      this.logger.warn(`视图别名未定义 >>> ${uri}`);
+      return Promise.resolve(false);
+    }
+
+    if (view === undefined) {
+      this.logger.warn(`View 工厂未定义 >>> ${uri}`);
+      return Promise.resolve(false);
+    }
+
+    if (presenter === undefined) {
+      this.logger.warn(`Presenter 工厂未定义 >>> ${uri}`);
+      return Promise.resolve(false);
+    }
+
+    if (schema === undefined) {
+      this.logger.warn(`视图结构未定义 >>> ${uri}`);
+      return Promise.resolve(false);
+    }
 
     // 视图层级打开的前置校验
     const layerInst = this.__getLayerOf(layer!)!;
     const ok = await layerInst.preOpen(uri);
     if (!ok) {
-      this.logger.warn(`视图层级结点不允许打开该视图 >>> ${uri}|${layer}`);
+      this.logger.warn(`不允许打开该视图 >>> ${uri}|layer(${GuiLayer[layer]})`);
       return Promise.resolve(false);
     }
 
     // 尝试从缓存中取
     if (this.__lru.has(uri)) {
-      const view = this.__lru.get(uri)!;
+      const page = this.__lru.get(uri)!;
       this.__lru.delete(uri);
-      await layerInst.didOpen(view, schema!);
-      await view.open('focus', args);
+      await layerInst.didOpen(page);
+      await page.open(args);
       return Promise.resolve(true);
     }
 
@@ -363,14 +359,14 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
 
     // 实例化资产
     const root = this.cargo.instantiate(uri)!;
-    const view = new factory!(root);
-    SetProperty(view, 'root', root);
-    SetProperty(view, 'uri', uri);
-    SetProperty(view, 'alias', alias);
-    SetProperty(view, 'layer', layer);
+    const page = new view(root, schema, presenter);
+    SetProperty(page, 'root', root);
+    SetProperty(page, 'uri', uri);
+    SetProperty(page, 'alias', alias);
+    SetProperty(page, 'layer', layer);
 
-    await layerInst.didOpen(view, schema!);
-    await view.open('init', args);
+    await layerInst.didOpen(page);
+    await page.open(args);
 
     return Promise.resolve(true);
   }

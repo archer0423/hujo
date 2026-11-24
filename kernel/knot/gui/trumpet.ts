@@ -7,18 +7,18 @@
  * ╚═╝  ╚═╝  ╚═════╝   ╚════╝   ╚═════╝
  * Copyright (c) 2026 archer0423
  *******************************************/
-import { GuiApsect, GuiApsectApi, GuiApsectOptions } from './layer';
+import { GuiLayerApsect, GuiLayerApsectApi, GuiLayerApsectOptions } from './layer';
 import { CargoGuiURI, GuiLayer } from './typings';
 import { GuiViewApi } from './view';
 
 /** 全服通告层配置 */
-export interface GuiTrumpetOptions extends GuiApsectOptions {}
+export interface GuiTrumpetOptions extends GuiLayerApsectOptions {}
 
 /** 全服通告层接口 */
-export interface GuiTrumpetApi extends GuiApsectApi {}
+export interface GuiTrumpetApi extends GuiLayerApsectApi {}
 
 /** 全服通告层结点 */
-export class GuiTrumpet extends GuiApsect implements GuiTrumpetApi {
+export class GuiTrumpet extends GuiLayerApsect implements GuiTrumpetApi {
   // public
 
   public override get trait(): string {

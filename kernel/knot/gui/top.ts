@@ -9,18 +9,18 @@
  *******************************************/
 import { Widget } from 'cc';
 
-import { GuiApsect, GuiApsectApi, GuiApsectOptions } from './layer';
+import { GuiLayerApsect, GuiLayerApsectApi, GuiLayerApsectOptions } from './layer';
 import { CargoGuiURI, GuiLayer } from './typings';
 import { GuiViewApi } from './view';
 
 /** 视图顶层配置 */
-export interface GuiTopOptions extends GuiApsectOptions {}
+export interface GuiTopOptions extends GuiLayerApsectOptions {}
 
 /** 视图顶层接口 */
-export interface GuiTopApi extends GuiApsectApi {}
+export interface GuiTopApi extends GuiLayerApsectApi {}
 
 /** 视图顶层结点 */
-export class GuiTop extends GuiApsect implements GuiTopApi {
+export class GuiTop extends GuiLayerApsect implements GuiTopApi {
   // public
 
   public override get trait(): string {

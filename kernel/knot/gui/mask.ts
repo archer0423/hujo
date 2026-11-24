@@ -13,7 +13,6 @@ import { Color, EventTouch, Graphics, Layers, Node, Widget } from 'cc';
 import { Knot, KnotApi, KnotOptions } from '../../core/knot';
 import { LauncherApi } from '../launcher';
 import { GuiApi } from './gui';
-import { GuiLayer } from './typings';
 import { GuiViewApi } from './view';
 
 /** 弹窗遮罩配置 */
@@ -40,7 +39,7 @@ export class GuiMask extends Knot<GuiMaskOptions> implements GuiMaskApi {
 
     this._root = null;
     this.__view = null;
-    this.__touchThrough = true;
+    this.__hits = 0;
   }
 
   public override get trait(): string {
@@ -87,8 +86,6 @@ export class GuiMask extends Knot<GuiMaskOptions> implements GuiMaskApi {
     wid.updateAlignment();
     root.on(Node.EventType.SIZE_CHANGED, this.__repaint, this);
     root.on(Node.EventType.TOUCH_START, this.__onTouchStart, this, true);
-    root.on(Node.EventType.TOUCH_MOVE, this.__onTouchMove, this, true);
-    root.on(Node.EventType.TOUCH_CANCEL, this.__onTouchCancel, this, true);
     root.on(Node.EventType.TOUCH_END, this.__onTouchEnd, this, true);
     root.active = false;
     this._root = root;
@@ -108,8 +105,10 @@ export class GuiMask extends Knot<GuiMaskOptions> implements GuiMaskApi {
 
   // private
 
+  /** 当前视图 */
   private __view: GuiViewApi | null;
-  private __touchThrough: boolean;
+  /** 点击到当前视图的次数 */
+  private __hits: number;
 
   /** 重绘 */
   private __repaint() {
@@ -120,38 +119,31 @@ export class GuiMask extends Knot<GuiMaskOptions> implements GuiMaskApi {
     graphics.fillRect(-width / 2 - 4, -height / 2 - 4, width + 8, height + 8);
   }
 
-  private __isTouchThrough(layer: GuiLayer) {
-    switch (layer) {
-      case GuiLayer.Alert:
-      case GuiLayer.Dialog:
-        return false;
-    }
-    return true;
-  }
-
+  /** 触摸开始回调 */
   private __onTouchStart(event: EventTouch) {
-    const touchThrough = this.__view ? this.__isTouchThrough(this.__view.layer) : true;
-    this.__touchThrough = touchThrough;
-    event.propagationStopped = !touchThrough;
-    event.propagationImmediateStopped = !touchThrough;
-    event.preventSwallow = touchThrough;
+    event.propagationStopped = true;
+    event.propagationImmediateStopped = true;
+    event.preventSwallow = false;
+    this.__hits = 0;
+    this.__hitView(event);
   }
 
-  private __onTouchMove(event: EventTouch) {
-    event.preventSwallow = this.__touchThrough;
-  }
-
-  private __onTouchCancel(event: EventTouch) {
-    event.preventSwallow = this.__touchThrough;
-  }
-
+  /** 触摸结束回调 */
   private __onTouchEnd(event: EventTouch) {
-    event.preventSwallow = this.__touchThrough;
+    event.preventSwallow = false;
+    if (this.__view && this.__hits === 0 && !this.__hitView(event)) {
+      this.__view.onHitOutside();
+    }
+  }
+
+  /** 是否点击到视图 */
+  private __hitView(event: EventTouch) {
     if (this.__view) {
       const pos = event.getLocation();
-      if (!this.__view.root._uiProps.uiTransformComp!.hitTest(pos)) {
-        this.__view.onHitOutside();
+      if (this.__view.root._uiProps.uiTransformComp!.hitTest(pos)) {
+        this.__hits++;
       }
     }
+    return this.__hits > 0;
   }
 }
