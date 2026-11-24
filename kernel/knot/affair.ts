@@ -226,25 +226,31 @@ export class AffairChannel {
 
   /**
    * 撤销指定事件和环境的所有监听器
-   * @param event - 事件
    * @param ambient - 环境
+   * @param event - 事件
    */
-  public removeAmbient(event: string, ambient: unknown): void {
-    if (this.__listeners.has(event)) {
-      const processMap = this.__listeners.get(event)!;
-      // 遍历所有 process，删除指定 ambient
-      // 注意：这里仍然是 O(n)，但通常 unlistenAmbient 使用较少
-      for (const [process, ambientMap] of processMap) {
-        ambientMap.delete(ambient);
-        if (ambientMap.size === 0) {
-          processMap.delete(process);
+  public removeAmbient(ambient: unknown, event?: string): void {
+    if (event) {
+      if (this.__listeners.has(event)) {
+        const processMap = this.__listeners.get(event)!;
+        // 遍历所有 process，删除指定 ambient
+        // 注意：这里仍然是 O(n)，但通常 unlistenAmbient 使用较少
+        for (const [process, ambientMap] of processMap) {
+          ambientMap.delete(ambient);
+          if (ambientMap.size === 0) {
+            processMap.delete(process);
+          }
+        }
+
+        // 如果该 event 已无任何监听器，清理 event 条目
+        if (processMap.size === 0) {
+          this.__listeners.delete(event);
         }
       }
-
-      // 如果该 event 已无任何监听器，清理 event 条目
-      if (processMap.size === 0) {
-        this.__listeners.delete(event);
-      }
+    } else {
+      this.__listeners.forEach((_, event) => {
+        this.removeAmbient(ambient, event);
+      });
     }
   }
 
