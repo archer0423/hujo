@@ -8,6 +8,8 @@
  * Copyright (c) 2026 archer0423
  *******************************************/
 
+import { HmsmOf } from '../skill/datetime';
+
 /** 日志分级 */
 export enum JournalLevel {
   Debug = 0,
@@ -121,17 +123,18 @@ export class JournalLogger {
     if (this.__journal.muted) return;
 
     const method = JOURNAL_METHODS[outputLevel];
+    const date = HmsmOf();
+    const [label, color] = this.__journal.styleOf(outputLevel);
     if (this.__journal.colorful) {
-      const [label, color] = this.__journal.styleOf(outputLevel);
       method.call(
         console,
-        `[${this.trait}] %c${label}%c ${title}`,
-        `color:${color};font-weight:bold;`,
-        'color:inherit;font-weight:inherit;',
+        `%c ${label} ${date} ${this.trait} > %c${title}`,
+        `color:${color};`,
+        `color:inherit;font-weight:bold;`,
         ...args,
       );
     } else {
-      method.call(console, `[${this.trait}] ${title}`, ...args);
+      method.call(console, `${label} ${this.trait} > ${title}`, ...args);
     }
   }
 }
