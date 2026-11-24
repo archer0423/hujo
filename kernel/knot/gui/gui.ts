@@ -133,7 +133,7 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
     const promise = this.__open(uri, args);
     promise.then((ok) => {
       if (ok) {
-        this.focus();
+        this.__maskStickyTop();
       }
       this.__requests.delete(uri);
     });
@@ -361,5 +361,20 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
     await view.open('init', args);
 
     return Promise.resolve(true);
+  }
+
+  /** 刷新顶部视图的遮罩 */
+  private __maskStickyTop() {
+    if (this.alert.depth) {
+      this.mask.show(this.alert.top!);
+    } else if (this.dialog.depth) {
+      this.mask.show(this.dialog.top!);
+    } else if (this.popup.depth) {
+      this.mask.show(this.popup.top!);
+    } else if (this.menu.depth) {
+      this.mask.show(this.menu.top!);
+    } else {
+      this.mask.hide();
+    }
   }
 }
