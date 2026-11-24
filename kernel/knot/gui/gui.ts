@@ -59,6 +59,8 @@ export interface GuiApi extends KnotApi<GuiOotions> {
   focus(): void;
   /** 使上一个顶层视图失焦 */
   blur(): void;
+  /** 刷新遮罩 */
+  refreshMask(): void;
 }
 
 /** Gui 系统结点 */
@@ -133,7 +135,7 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
     const promise = this.__open(uri, args);
     promise.then((ok) => {
       if (ok) {
-        this.__maskStickyTop();
+        this.refreshMask();
       }
       this.__requests.delete(uri);
     });
@@ -167,6 +169,7 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
 
     // 聚焦到下一个顶层视图
     this.focus();
+    this.refreshMask();
 
     return Promise.resolve(true);
   }
@@ -181,18 +184,12 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
   public focus() {
     if (this.alert.depth) {
       this.alert.top!.focus();
-      this.mask.show(this.alert.top!);
     } else if (this.dialog.depth) {
       this.dialog.top!.focus();
-      this.mask.show(this.dialog.top!);
     } else if (this.popup.depth) {
       this.popup.top!.focus();
-      this.mask.show(this.popup.top!);
     } else if (this.menu.depth) {
       this.menu.top!.focus();
-      this.mask.show(this.menu.top!);
-    } else {
-      this.mask.hide();
     }
   }
 
@@ -205,6 +202,21 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
       this.popup.top!.blur();
     } else if (this.menu.depth) {
       this.menu.top!.blur();
+    }
+  }
+
+  /** 刷新遮罩 */
+  public refreshMask() {
+    if (this.alert.depth) {
+      this.mask.show(this.alert.top!);
+    } else if (this.dialog.depth) {
+      this.mask.show(this.dialog.top!);
+    } else if (this.popup.depth) {
+      this.mask.show(this.popup.top!);
+    } else if (this.menu.depth) {
+      this.mask.show(this.menu.top!);
+    } else {
+      this.mask.hide();
     }
   }
 
@@ -361,20 +373,5 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
     await view.open('init', args);
 
     return Promise.resolve(true);
-  }
-
-  /** 刷新顶部视图的遮罩 */
-  private __maskStickyTop() {
-    if (this.alert.depth) {
-      this.mask.show(this.alert.top!);
-    } else if (this.dialog.depth) {
-      this.mask.show(this.dialog.top!);
-    } else if (this.popup.depth) {
-      this.mask.show(this.popup.top!);
-    } else if (this.menu.depth) {
-      this.mask.show(this.menu.top!);
-    } else {
-      this.mask.hide();
-    }
   }
 }
