@@ -14,10 +14,15 @@ import { Knot, KnotApi, KnotOptions } from '../../core/knot';
 import { Now } from '../../skill/datetime';
 import { Split } from '../../skill/list';
 import { CargoGuiURI } from '../gui/typings';
-import { CargoDynamicApi } from './dynamic';
-import { CargoRegistryApi } from './registry';
-import { CargoRemoteApi } from './remote';
-import { CargoDigest, CargoDynamicURI, CargoRemoteURI, CargoURI } from './typings';
+import {
+  CargoDigest,
+  CargoDynamicApi,
+  CargoDynamicURI,
+  CargoRegistryApi,
+  CargoRemoteApi,
+  CargoRemoteURI,
+  CargoURI,
+} from './cargo.typings';
 import { ParseCargoURI } from './util';
 
 /** 资产管理配置 */

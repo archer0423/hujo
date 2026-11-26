@@ -8,7 +8,7 @@
  * Copyright (c) 2026 archer0423
  *******************************************/
 
-import { FntCharDef, FntConfig } from '../typings';
+import { FntCharDef, FntConfig } from '../cargo.typings';
 
 /** 属性对正则：形如 `key=value` 或 `key="value"` */
 const RE_ATTR = /([a-zA-Z_]\w*)\s*=\s*(?:"([^"]*)"|(\S*))/g;

@@ -27,7 +27,7 @@ import {
   VideoClip,
 } from 'cc';
 
-import { CargoCtor, CargoType, CargoURI } from './typings';
+import { CargoCtor, CargoType, CargoURI } from './cargo.typings';
 
 /** 资产类型 */
 const CARGO_TYPES: CargoType[] = [

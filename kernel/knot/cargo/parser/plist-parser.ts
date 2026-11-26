@@ -8,7 +8,7 @@
  * Copyright (c) 2026 archer0423
  *******************************************/
 
-import { AtlasConfig, AtlasFrameDef } from '../typings';
+import { AtlasConfig, AtlasFrameDef } from '../cargo.typings';
 
 /** plist token：键、值或容器边界 */
 type Token = { kind: 'key' | 'value'; value: string } | { kind: 'dict' | 'end' };

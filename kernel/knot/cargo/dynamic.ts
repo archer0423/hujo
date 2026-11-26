@@ -10,48 +10,18 @@
 
 import { assetManager } from 'cc';
 
-import { Knot, KnotApi, KnotOptions } from '../../core/knot';
+import { Knot } from '../../core/knot';
 import { Split } from '../../skill/list';
 import { CargoApi } from './cargo';
-import { CargoRegistryApi } from './registry';
-import { CargoDynamicURI, CargoLoadItem, CargoLoadState, CargoURI } from './typings';
+import {
+  CargoDynamicApi,
+  CargoDynamicOptions,
+  CargoDynamicURI,
+  CargoLoadItem,
+  CargoLoadState,
+  CargoRegistryApi,
+} from './cargo.typings';
 import { GetCargoFactory, IsValidCargoURI, ParseCargoURI } from './util';
-
-/** 动态加载器配置 */
-export interface CargoDynamicOptions extends KnotOptions {}
-
-/** 动态加载器接口 */
-export interface CargoDynamicApi extends KnotApi<CargoDynamicOptions> {
-  /** 是否在请求缓存中 */
-  has(uri: CargoDynamicURI): boolean;
-  /** 加载资产 */
-  load(uri: CargoURI): Promise<void>;
-  /**
-   * 批量加载资产
-   * @param items 入参资产
-   * @param parallels 每批次并发数量
-   */
-  loadBatch(items: CargoDynamicURI[], parallels?: number): Promise<void>;
-  /** 中断资产加载 */
-  abort(uri: CargoDynamicURI): void;
-  /** 批量中断资产加载 */
-  abortBatch(items: CargoDynamicURI[]): void;
-  /** 放弃缓存 */
-  uncache(uri: string): void;
-  /** 加载统计 */
-  readonly stats: {
-    /** 总数 */
-    total: number;
-    /** 错误数量 */
-    error: number;
-    /** 已完成数量 */
-    loaded: number;
-    /** 加载中数量 */
-    loading: number;
-    /** 已中断数量 */
-    aborted: number;
-  };
-}
 
 /**
  * 动态加载器结点

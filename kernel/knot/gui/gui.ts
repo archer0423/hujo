@@ -12,7 +12,7 @@ import { LRU } from '../../cord/lru';
 import { Knot, KnotApi, KnotOptions } from '../../core/knot';
 import { SetProperty } from '../../skill/dict';
 import { Cargo } from '../cargo/cargo';
-import { CargoRegistryApi } from '../cargo/registry';
+import { CargoRegistryApi } from '../cargo/cargo.typings';
 import { IsTargetedCargoURI } from '../cargo/util';
 import { GuiAlertApi } from './alert';
 import { GuiDialogApi } from './dialog';

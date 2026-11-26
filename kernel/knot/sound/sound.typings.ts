@@ -11,7 +11,7 @@
 import { AudioSource } from 'cc';
 
 import { KnotApi, KnotOptions } from '../../core/knot';
-import { CargoURI } from '../cargo/typings';
+import { CargoURI } from '../cargo/cargo.typings';
 
 /** 音频类型 */
 export type SoundType = 'effect' | 'music' | 'one-shot-effect';

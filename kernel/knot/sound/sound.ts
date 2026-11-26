@@ -15,7 +15,7 @@ import { Now } from '../../skill/datetime';
 import { Clamp01 } from '../../skill/digit';
 import { ArchiveApi, ArchiveDocumentApi } from '../archive/archive.typings';
 import { CargoApi } from '../cargo/cargo';
-import { CargoURI } from '../cargo/typings';
+import { CargoURI } from '../cargo/cargo.typings';
 import { ParseCargoURI } from '../cargo/util';
 import { LauncherApi } from '../launcher/launcher.typings';
 import { SoundApi, SoundOptions, SoundRegistry, SoundSession, SoundType } from './sound.typings';
