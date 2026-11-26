@@ -26,7 +26,8 @@ export * from './cord/xor';
 // knot
 export * from './knot/access/access';
 export * from './knot/access/access.typings';
-export * from './knot/archive';
+export * from './knot/archive/archive';
+export * from './knot/archive/archive.typings';
 export * from './knot/auditor/auditor';
 export * from './knot/auditor/auditor.typings';
 export * from './knot/affair/affair';

@@ -8,12 +8,24 @@
  * Copyright (c) 2026 archer0423
  *******************************************/
 
-import { AudioClip, AudioSource, Layers, Node } from 'cc';
+import {
+  AudioClip,
+  AudioSource,
+  Layers,
+  Node,
+} from 'cc';
 
-import { Knot, KnotApi, KnotOptions } from '../core/knot';
+import {
+  Knot,
+  KnotApi,
+  KnotOptions,
+} from '../core/knot';
 import { Now } from '../skill/datetime';
 import { Clamp01 } from '../skill/digit';
-import { ArchiveApi, ArchiveDocument } from './archive';
+import {
+  ArchiveApi,
+  ArchiveDocumentApi,
+} from './archive/archive.typings';
 import { CargoApi } from './cargo/cargo';
 import { CargoURI } from './cargo/typings';
 import { ParseCargoURI } from './cargo/util';
@@ -493,7 +505,7 @@ export class Sound extends Knot<SoundOptions> implements SoundApi {
   // private
 
   /** 音频相关存档 */
-  private __doc!: ArchiveDocument;
+  private __doc!: ArchiveDocumentApi;
   /** 音频注册表 */
   private __registry: Map<CargoURI, SoundRegistry>;
   /** 音频会话表 */

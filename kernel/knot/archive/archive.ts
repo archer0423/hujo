@@ -10,60 +10,20 @@
 
 import { sys } from 'cc';
 
-import { journal } from '../core/journal';
-import { Knot, KnotApi, KnotOptions } from '../core/knot';
-
-/** 存储值类型（只允许布尔值/数值/字符串） */
-export type ArchiveItemValue = boolean | number | string;
-
-/** 存储字段形式 */
-export type ArchiveItemKey = `${string}@${'b' | 'n' | 's'}`;
-
-/** 存储项配置 */
-export type ArchiveField<V extends ArchiveItemValue> = [trait: ArchiveItemKey, defalut: V];
-
-/** 存档配置 */
-export interface ArchiveOptions extends KnotOptions {
-  /** 应用名称 */
-  app: string;
-  /** 序列化 */
-  serialize?: (text: string) => string;
-  /** 反序列化 */
-  deserialize?: (text: string) => string;
-  /** 自动保存时间间隔（默认 30 秒） */
-  autoSaveInterval?: number;
-}
-
-/** 存档结点接口 */
-export interface ArchiveApi extends KnotApi<ArchiveOptions> {
-  /**
-   * 获取/创建存档
-   * @param doc 存档标识
-   * @param fields 字段
-   * @throws 如果存档已存在则会抛出错误
-   * @returns
-   */
-  create(doc: string, fields: ArchiveField<ArchiveItemValue>[]): ArchiveDocument;
-  /**
-   * 获取存档
-   * @param doc 存档标识
-   * @returns 存档
-   */
-  get(doc: string): ArchiveDocument | undefined;
-  /**
-   * 删除存档
-   * @param doc 存档标识
-   */
-  delete(doc: string): void;
-  /** 保存所有存档 */
-  save(): void;
-}
-
-/** 存档监听器 */
-export type ArchiveListener = (curr: ArchiveItemValue, prev: ArchiveItemValue) => void;
+import { journal } from '../../core/journal';
+import { Knot } from '../../core/knot';
+import {
+  ArchiveApi,
+  ArchiveDocumentApi,
+  ArchiveField,
+  ArchiveItemKey,
+  ArchiveItemValue,
+  ArchiveListener,
+  ArchiveOptions,
+} from './archive.typings';
 
 /** 存档 */
-export class ArchiveDocument {
+export class ArchiveDocument implements ArchiveDocumentApi {
   // public
 
   /**
@@ -85,10 +45,6 @@ export class ArchiveDocument {
     this.__listeners = new Map();
   }
 
-  /**
-   * 安装所有字段（一次性）
-   * @param fields 字段入参
-   */
   public install(fields: ArchiveField<ArchiveItemValue>[]) {
     if (this.__fields.size === 0) {
       for (const [trait, value] of fields) {
@@ -97,11 +53,6 @@ export class ArchiveDocument {
     }
   }
 
-  /**
-   * 读取字段
-   * @param trait 字段标识
-   * @returns 字段内容
-   */
   public read<V extends ArchiveItemValue>(trait: ArchiveItemKey) {
     const key = `${this.app}@${this.doc}:${trait}`;
 
@@ -119,12 +70,6 @@ export class ArchiveDocument {
     return ret as V;
   }
 
-  /**
-   * 写入字段
-   * @param trait 字段标识
-   * @param value 字段内容
-   * @returns
-   */
   public write<V extends ArchiveItemValue>(trait: ArchiveItemKey, value: V) {
     const key = `${this.app}@${this.doc}:${trait}`;
 
@@ -152,7 +97,6 @@ export class ArchiveDocument {
     this.__fire(trait, value, prev);
   }
 
-  /** 保存脏字段 */
   public saveDirty() {
     if (this.__dirtyFields.size) {
       for (const trait of this.__dirtyFields) {
@@ -161,14 +105,12 @@ export class ArchiveDocument {
     }
   }
 
-  /** 强制保存存档 */
   public save() {
     for (const [trait] of this.__fields) {
       this.__save(trait);
     }
   }
 
-  /** 删除存档 */
   public prune() {
     for (const [trait] of this.__fields) {
       const key = `${this.app}@${this.doc}:${trait}`;
@@ -178,11 +120,6 @@ export class ArchiveDocument {
     this.__listeners.clear();
   }
 
-  /**
-   * 添加字段监听器
-   * @param trait 字段标识
-   * @param listener 监听器
-   */
   public on(trait: ArchiveItemKey, listener: ArchiveListener) {
     if (this.__listeners.has(trait)) {
       this.__listeners.get(trait)!.add(listener);
@@ -191,12 +128,6 @@ export class ArchiveDocument {
     }
   }
 
-  /**
-   * 添加一次性字段监听器
-   * @param trait 字段标识
-   * @param listener 监听器
-   * @returns 包装后的监听器（用于手动移除监听器）
-   */
   public once(trait: ArchiveItemKey, listener: ArchiveListener): ArchiveListener {
     const wrapper = (curr: ArchiveItemValue, prev: ArchiveItemValue) => {
       listener(curr, prev);
@@ -210,11 +141,6 @@ export class ArchiveDocument {
     return wrapper;
   }
 
-  /**
-   * 移除字段监听器
-   * @param trait 字段标识
-   * @param listener 监听器
-   */
   public off(trait: ArchiveItemKey, listener: ArchiveListener) {
     if (this.__listeners.has(trait)) {
       this.__listeners.get(trait)!.delete(listener);
@@ -224,15 +150,10 @@ export class ArchiveDocument {
     }
   }
 
-  /**
-   * 移除指定字段的所有监听器
-   * @param trait 字段标识
-   */
   public offTargeted(trait: ArchiveItemKey) {
     this.__listeners.delete(trait);
   }
 
-  /** 移除所有字段监听器 */
   public offAll() {
     this.__listeners.clear();
   }
@@ -345,6 +266,7 @@ export class ArchiveDocument {
     }
   }
 
+  /** 日志记录器 */
   private get __logger() {
     return journal.acquire(Archive.prototype.trait);
   }
