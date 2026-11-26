@@ -17,7 +17,7 @@ import { ArchiveApi, ArchiveDocument } from './archive';
 import { CargoApi } from './cargo/cargo';
 import { CargoURI } from './cargo/typings';
 import { ParseCargoURI } from './cargo/util';
-import { LauncherApi } from './launcher';
+import { LauncherApi } from './launcher/launcher.typings';
 
 /** 音频类型 */
 export type SoundType = 'effect' | 'music' | 'one-shot-effect';

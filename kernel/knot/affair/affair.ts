@@ -8,76 +8,17 @@
  * Copyright (c) 2026 archer0423
  *******************************************/
 
-import { journal } from '../core/journal';
-import { Knot, KnotApi, KnotOptions } from '../core/knot';
-import { RunSync } from '../skill/might';
-
-/** 事件监听器 */
-export type AffairListener = [
-  process: (message: AffairPacket) => void,
-  ambient: unknown,
-  once: boolean,
-];
-
-/** 消息数据包 */
-export interface AffairPacket<T = unknown> {
-  /** 事件 */
-  event: string;
-  /** 数据 */
-  payload: T;
-}
-
-/** 事件渠道统计 */
-export interface AffairStats {
-  /** 渠道 */
-  channel: string;
-  /** 事件 */
-  event: string;
-  /** 监听器数量 */
-  count: number;
-}
-
-/** 事件总线插件配置 */
-export interface AffairOptions extends KnotOptions {}
-
-/**
- * 事件总线接口
- */
-export interface AffairApi extends KnotApi<AffairOptions> {
-  /** 监听器数量 */
-  get size(): number;
-  /** 渠道详情 */
-  get stats(): AffairStats[];
-  /**
-   * 渠道是否已部署
-   * @param channel - 渠道
-   */
-  has(channel: string): boolean;
-  /**
-   * 获取事件渠道
-   * @param channel 渠道
-   */
-  acquire(channel: string): AffairChannel;
-  /**
-   * 移除渠道
-   * @param channel - 渠道
-   */
-  remove(channel: string): void;
-  /** 清空所有渠道 */
-  clear(): void;
-  /** 默认事件渠道（访问即创建） */
-  get sys(): AffairChannel;
-  /** GUI 事件渠道（访问即创建） */
-  get gui(): AffairChannel;
-  /** HTTP 事件渠道（访问即创建） */
-  get http(): AffairChannel;
-  /** socket 事件渠道（访问即创建） */
-  get net(): AffairChannel;
-  /** Red 事件渠道（访问即创建） */
-  get red(): AffairChannel;
-}
-
-// implements
+import { journal } from '../../core/journal';
+import { Knot } from '../../core/knot';
+import { RunSync } from '../../skill/might';
+import {
+  AffairApi,
+  AffairChannelApi,
+  AffairListener,
+  AffairOptions,
+  AffairPacket,
+  AffairStats,
+} from './affair.typings';
 
 /**
  * 事件消息
@@ -112,10 +53,9 @@ export class AffairMessage<T = unknown> implements AffairPacket<T> {
 /**
  * 事件渠道
  */
-export class AffairChannel {
+export class AffairChannel implements AffairChannelApi {
   // public
 
-  /** 渠道 */
   public readonly channel: string;
 
   public constructor(channel: string) {
@@ -123,7 +63,6 @@ export class AffairChannel {
     this.__listeners = new Map();
   }
 
-  /** 监听器数量 */
   public get size(): number {
     let count = 0;
     this.__listeners.forEach((processMap) => {
@@ -134,7 +73,6 @@ export class AffairChannel {
     return count;
   }
 
-  /** 渠道详情 */
   public get stats(): AffairStats[] {
     const stats: AffairStats[] = [];
     this.__listeners.forEach((processMap, event) => {
@@ -148,22 +86,10 @@ export class AffairChannel {
     return stats;
   }
 
-  /**
-   * 事件是否已监听
-   * @param event - 事件
-   */
   public has(event: string): boolean {
     return this.__listeners.has(event);
   }
 
-  /**
-   * 布置监听器
-   * @tip 同 (event, process, ambient) 重复布置以首次注册为准，once 不可通过重复布置更新
-   * @param event - 事件
-   * @param process - 处理方式
-   * @param ambient - 环境
-   * @param once - 是否一次性
-   */
   public add(
     event: string,
     process: (message: AffairPacket) => void,
@@ -197,12 +123,6 @@ export class AffairChannel {
     ambientMap.set(ambient, listener);
   }
 
-  /**
-   * 撤销指定监听器
-   * @param event - 事件
-   * @param process - 处理方式
-   * @param ambient - 环境
-   */
   public remove(event: string, process: (message: AffairPacket) => void, ambient: unknown): void {
     if (this.__listeners.has(event)) {
       const processMap = this.__listeners.get(event)!;
@@ -224,11 +144,6 @@ export class AffairChannel {
     }
   }
 
-  /**
-   * 撤销指定事件和环境的所有监听器
-   * @param ambient - 环境
-   * @param event - 事件
-   */
   public removeAmbient(ambient: unknown, event?: string): void {
     if (event) {
       if (this.__listeners.has(event)) {
@@ -254,25 +169,14 @@ export class AffairChannel {
     }
   }
 
-  /**
-   * 撤销指定代号的所有监听器
-   * @param event - 事件
-   */
   public removeEvent(event: string): void {
     this.__listeners.delete(event);
   }
 
-  /** 在默认渠道上撤销所有监听器 */
   public clear(): void {
     this.__listeners.clear();
   }
 
-  /**
-   * 通报
-   * @tip 非快照语义：执行期间新增的同事件监听器会在本轮即被迭代执行；
-   *      once 监听器执行后立即移除（嵌套通报不会重复执行）
-   * @param message - 数据（不可为空）
-   */
   public notify(msg: AffairPacket | string, payload?: AffairPacket['payload']): void {
     if (typeof msg === 'string') {
       if (typeof payload === 'undefined') {

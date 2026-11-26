@@ -27,7 +27,7 @@ import { Now } from '../../skill/datetime';
 import { EachProperties, Override } from '../../skill/dict';
 import { MISC } from '../../skill/env';
 import { GetQueryString } from '../../skill/web';
-import { AffairApi } from '../affair';
+import { AffairApi } from '../affair/affair.typings';
 import { Build, LanguageType, LauncherApi, LauncherOptions } from './launcher.typings';
 
 // implements

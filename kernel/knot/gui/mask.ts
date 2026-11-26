@@ -11,7 +11,7 @@
 import { Color, EventTouch, Graphics, Layers, Node, Widget } from 'cc';
 
 import { Knot, KnotApi, KnotOptions } from '../../core/knot';
-import { LauncherApi } from '../launcher';
+import { LauncherApi } from '../launcher/launcher.typings';
 import { GuiApi } from './gui';
 import { GuiViewApi } from './view';
 

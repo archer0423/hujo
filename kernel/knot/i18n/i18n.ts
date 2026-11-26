@@ -11,7 +11,7 @@
 import { journal } from '../../core/journal';
 import { Knot } from '../../core/knot';
 import { FmtString } from '../../skill/literal';
-import { AffairApi } from '../affair';
+import { AffairApi } from '../affair/affair.typings';
 import { I18nApi, I18nOptions } from './i18n.typings';
 
 /**
