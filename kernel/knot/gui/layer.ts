@@ -12,7 +12,7 @@ import { Layers, Node, UITransform } from 'cc';
 
 import { Knot, KnotApi, KnotOptions } from '../../core/knot';
 import { SetProperty } from '../../skill/dict';
-import { Launcher } from '../launcher';
+import { LauncherApi } from '../launcher/launcher.typings';
 import { GuiApi } from './gui';
 import { CargoGuiURI, GuiLayer } from './typings';
 import { GuiViewApi } from './view';
@@ -64,7 +64,7 @@ export abstract class GuiLayerApsect
 {
   // public
 
-  declare public readonly launcher: Launcher;
+  declare public readonly launcher: LauncherApi;
   declare public readonly gui: GuiApi;
 
   public constructor() {
