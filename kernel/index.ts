@@ -58,7 +58,8 @@ export * from './knot/sentry';
 export * from './knot/spider';
 export * from './knot/sound';
 export * from './knot/tabular';
-export * from './knot/timer';
+export * from './knot/timer/timer';
+export * from './knot/timer/timer.typings';
 // skill
 export * from './skill/base64';
 export * from './skill/color';

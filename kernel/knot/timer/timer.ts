@@ -10,68 +10,21 @@
 
 import { director, game, Director } from 'cc';
 
-import { journal } from '../core/journal';
-import { Knot, KnotApi, KnotOptions } from '../core/knot';
-import { RunSync } from '../skill/might';
-
-/** 时钟详情 */
-export interface ClockStats {
-  /** 标识 */
-  trait: string;
-  /** 数量 */
-  size: number;
-  /** 速度 */
-  speed: number;
-}
-
-/** 定时器配置 */
-export interface TimerOptions extends KnotOptions {}
-
-/**
- * 定时器接口
- */
-export interface TimerApi extends KnotApi<TimerOptions> {
-  /** 运行状态（外部控制开关，不会影响到时钟内部的运转状态） */
-  get running(): boolean;
-  /** 时钟数量 */
-  get size(): number;
-  /** 时钟详情 */
-  get stats(): ClockStats[];
-  /** 运转 */
-  run(): void;
-  /** 暂停 */
-  pause(): void;
-  /**
-   * 创建/获取时钟
-   * @param token 时钟标识
-   */
-  acquire(token: string): Clock;
-  /**
-   * 移除指定时钟
-   * @param token 时钟标识
-   */
-  remove(token: string): void;
-  /**
-   * 是否有指定时钟
-   * @param token 时钟标识
-   */
-  has(token: string): boolean;
-  /** 移除所有时钟 */
-  clear(): void;
-  /** 用于公共的时钟 */
-  get shared(): Clock;
-  /** 用于巡检的时钟 */
-  get inspector(): Clock;
-}
-
-/** 闹钟监听器 */
-export type TimerListener<P extends unknown[] = []> = (...args: P) => void;
-
-/** 监听器配置（环境与一次性标记，以处方为键实现注册幂等） */
-export type TimerListenerOptions = [ambient?: unknown, once?: boolean];
+import { journal } from '../../core/journal';
+import { Knot } from '../../core/knot';
+import { RunSync } from '../../skill/might';
+import {
+  AlarmApi,
+  ClockApi,
+  ClockStats,
+  TimerApi,
+  TimerListener,
+  TimerListenerOptions,
+  TimerOptions,
+} from './timer.typings';
 
 /** 闹钟 */
-export class Alarm {
+export class Alarm implements AlarmApi {
   // public static
 
   /** 重置编号计数器（仅在所有闹钟清理后安全调用） */
@@ -109,17 +62,14 @@ export class Alarm {
     this.__done = false;
   }
 
-  /** 闹钟编号 */
   public get cid() {
     return this.__cid;
   }
 
-  /** 是否已完成 */
   public get done() {
     return this.__done;
   }
 
-  /** 重置（恢复初始配置并重新计时，监听器保留） */
   public reset(): void {
     this.__delay = this.__initialDelay;
     this.__interval = this.__initialInterval;
@@ -130,23 +80,10 @@ export class Alarm {
     this.__done = false;
   }
 
-  /**
-   * 添加计帧监听器
-   * @tip 延迟期内不执行计帧回调，延迟结束后随帧触发
-   * @param process 处方
-   * @param ambient 环境
-   * @param once 一次性
-   */
   public addFrameListener(process: (dt: number) => void, ambient: unknown, once: boolean) {
     (this.__frameListeners ??= new Map()).set(process, [ambient, once]); // 同一处方重复注册时覆盖
   }
 
-  /**
-   * 添加计次监听器
-   * @param process 处方
-   * @param ambient 环境
-   * @param once 一次性
-   */
   public addCountListener(
     process: (count: number, total: number) => void,
     ambient: unknown,
@@ -155,12 +92,6 @@ export class Alarm {
     (this.__countListeners ??= new Map()).set(process, [ambient, once]); // 同一处方重复注册时覆盖
   }
 
-  /**
-   * 添加计频监听器
-   * @param process 处方
-   * @param ambient 环境
-   * @param once 一次性
-   */
   public addFrequencyListener(
     process: (frequency: number) => void,
     ambient: unknown,
@@ -169,20 +100,10 @@ export class Alarm {
     (this.__frequencyListeners ??= new Map()).set(process, [ambient, once]); // 同一处方重复注册时覆盖
   }
 
-  /**
-   * 添加完成监听器
-   * @param process 处方
-   * @param ambient 环境
-   * @param once 一次性
-   */
   public addDoneListener(process: () => void, ambient: unknown, once: boolean) {
     (this.__doneListeners ??= new Map()).set(process, [ambient, once]); // 同一处方重复注册时覆盖
   }
 
-  /**
-   * 步进
-   * @param dt 时间片
-   */
   public step(dt: number) {
     if (this.__done) return;
     if (!Number.isFinite(dt) || dt < 0) return; // 拒绝非法时间片，防止 NaN 污染累积量与时间倒流
@@ -336,7 +257,7 @@ export class Alarm {
 }
 
 /** 时钟 */
-export class Clock {
+export class Clock implements ClockApi {
   // public
 
   public constructor() {
@@ -345,7 +266,6 @@ export class Clock {
     this.__alarms = new Map();
   }
 
-  /** 速度 */
   public get speed() {
     return this.__speed;
   }
@@ -356,80 +276,48 @@ export class Clock {
     }
   }
 
-  /** 运行状态 */
   public get running(): boolean {
     return this.__running;
   }
 
-  /** 闹钟数量 */
   public get size() {
     return this.__alarms.size;
   }
 
-  /** 运行 */
   public run(): void {
     this.__running = true;
   }
 
-  /** 暂停 */
   public pause(): void {
     this.__running = false;
   }
 
-  /** 重置 */
   public reset() {
     this.pause();
     this.__alarms.forEach((alarm) => alarm.reset());
   }
 
-  /** 停止 */
   public stop() {
     this.pause();
     this.__alarms.clear();
   }
 
-  /**
-   * 移除闹钟
-   * @param cid 闹钟标识
-   */
   public remove(cid: number) {
     this.__alarms.delete(cid);
   }
 
-  /**
-   * 创建延迟闹钟
-   * @param delay 延迟时间
-   * @param process 处方
-   * @param ambient 环境
-   * @returns 闹钟标识
-   */
   public delay(delay: number, process: () => void, ambient: unknown): number {
     const counter = this.__add(0, delay, 1);
     counter.addDoneListener(process, ambient, true);
     return counter.cid;
   }
 
-  /**
-   * 创建一帧延迟闹钟
-   * @param process 处方
-   * @param ambient 环境
-   * @returns 闹钟标识
-   */
   public nextFrame(process: () => void, ambient: unknown): number {
     const counter = this.__add(0, 0, 1);
     counter.addDoneListener(process, ambient, true);
     return counter.cid;
   }
 
-  /**
-   * 创建重复执行闹钟
-   * @param delay 延迟
-   * @param interval 间隔
-   * @param total 总数
-   * @param process 处方
-   * @param ambient 环境
-   * @returns 闹钟标识
-   */
   public repeat(
     delay: number,
     interval: number,
@@ -442,14 +330,6 @@ export class Clock {
     return counter.cid;
   }
 
-  /**
-   * 创建永久执行闹钟
-   * @param delay 延迟
-   * @param interval 间隔
-   * @param process 处方
-   * @param ambient 环境
-   * @returns 闹钟标识
-   */
   public loop(
     delay: number,
     interval: number,
@@ -461,25 +341,12 @@ export class Clock {
     return counter.cid;
   }
 
-  /**
-   * 创建每帧执行闹钟
-   * @param process 处方
-   * @param ambient 环境
-   * @returns 闹钟标识
-   */
   public everyFrame(process: (dt: number) => void, ambient: unknown): number {
     const counter = this.__add(0, 0, 0);
     counter.addFrameListener(process, ambient, false);
     return counter.cid;
   }
 
-  /**
-   * 创建频次执行闹钟
-   * @param interval 间隔
-   * @param process 处方
-   * @param ambient 环境
-   * @returns 闹钟标识
-   */
   public everyFrequency(
     interval: number,
     process: (frequency: number) => void,
@@ -490,22 +357,12 @@ export class Clock {
     return counter.cid;
   }
 
-  /**
-   * 创建每秒执行闹钟
-   * @param process 处方
-   * @param ambient 环境
-   * @returns 闹钟标识
-   */
   public everySecond(process: (count: number, total: number) => void, ambient: unknown): number {
     const counter = this.__add(0, 1, 0);
     counter.addCountListener(process, ambient, false);
     return counter.cid;
   }
 
-  /**
-   * 时钟步进
-   * @param dt 时间增量
-   */
   public tick(dt: number) {
     if (this.__speed <= 0 || !this.__running) return;
 
