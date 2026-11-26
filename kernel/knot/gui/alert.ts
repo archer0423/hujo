@@ -10,15 +10,10 @@
 
 import { Widget } from 'cc';
 
-import { GuiLayerApsect, GuiLayerApsectApi, GuiLayerApsectOptions } from './layer';
-import { CargoGuiURI, GuiLayer } from './typings';
-import { GuiViewApi } from './view';
-
-/** 紧急模态弹窗层配置 */
-export interface GuiAlertOptions extends GuiLayerApsectOptions {}
-
-/** 紧急模态弹窗层接口 */
-export interface GuiAlertApi extends GuiLayerApsectApi {}
+import { GuiAlertApi } from './alert.typings';
+import { GuiLayerApsect } from './aspect';
+import { CargoGuiURI, GuiLayer } from './gui.typings';
+import { GuiViewApi } from './view.typings';
 
 /** 紧急模态弹窗层结点 */
 export class GuiAlert extends GuiLayerApsect implements GuiAlertApi {

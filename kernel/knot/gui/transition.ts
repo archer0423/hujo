@@ -9,15 +9,10 @@
  *******************************************/
 import { Widget } from 'cc';
 
-import { GuiLayerApsect, GuiLayerApsectApi, GuiLayerApsectOptions } from './layer';
-import { CargoGuiURI, GuiLayer } from './typings';
-import { GuiViewApi } from './view';
-
-/** 场景过渡层配置 */
-export interface GuiTransitionOptions extends GuiLayerApsectOptions {}
-
-/** 场景过渡层接口 */
-export interface GuiTransitionApi extends GuiLayerApsectApi {}
+import { GuiLayerApsect } from './aspect';
+import { CargoGuiURI, GuiLayer } from './gui.typings';
+import { GuiTransitionApi } from './transition.typings';
+import { GuiViewApi } from './view.typings';
 
 /** 场景过渡层结点 */
 export class GuiTransition extends GuiLayerApsect implements GuiTransitionApi {

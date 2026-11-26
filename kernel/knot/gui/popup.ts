@@ -9,15 +9,10 @@
  *******************************************/
 import { Widget } from 'cc';
 
-import { GuiLayerApsect, GuiLayerApsectApi, GuiLayerApsectOptions } from './layer';
-import { CargoGuiURI, GuiLayer } from './typings';
-import { GuiViewApi } from './view';
-
-/** 非模态弹窗层配置 */
-export interface GuiPopupOptions extends GuiLayerApsectOptions {}
-
-/** 非模态弹窗层接口 */
-export interface GuiPopupApi extends GuiLayerApsectApi {}
+import { GuiLayerApsect } from './aspect';
+import { CargoGuiURI, GuiLayer } from './gui.typings';
+import { GuiPopupApi } from './popup.typings';
+import { GuiViewApi } from './view.typings';
 
 /** 非模态弹窗层结点 */
 export class GuiPopup extends GuiLayerApsect implements GuiPopupApi {

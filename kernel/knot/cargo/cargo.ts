@@ -13,16 +13,11 @@ import { assetManager, instantiate, Asset, Node, Prefab } from 'cc';
 import { Knot, KnotApi, KnotOptions } from '../../core/knot';
 import { Now } from '../../skill/datetime';
 import { Split } from '../../skill/list';
-import { CargoGuiURI } from '../gui/typings';
-import {
-  CargoDigest,
-  CargoDynamicApi,
-  CargoDynamicURI,
-  CargoRegistryApi,
-  CargoRemoteApi,
-  CargoRemoteURI,
-  CargoURI,
-} from './cargo.typings';
+import { CargoGuiURI } from '../gui/gui.typings';
+import { CargoDigest, CargoDynamicURI, CargoRemoteURI, CargoURI } from './cargo.typings';
+import { CargoDynamicApi } from './dynamic.typings';
+import { CargoRegistryApi } from './registry.typings';
+import { CargoRemoteApi } from './remote.typings';
 import { ParseCargoURI } from './util';
 
 /** 资产管理配置 */
@@ -122,7 +117,7 @@ export class Cargo extends Knot<CargoOptions> implements CargoApi {
         uri,
         recent: Now(),
         ref: 0,
-        ttl: this.registry.get(uri)!.ttl,
+        ttl: this.registry.get(uri)!.ttl!,
       });
       this.__lookup.set(asset, uri);
     } else {

@@ -9,62 +9,29 @@
  *******************************************/
 
 import { LRU } from '../../cord/lru';
-import { Knot, KnotApi, KnotOptions } from '../../core/knot';
+import { Knot } from '../../core/knot';
 import { SetProperty } from '../../skill/dict';
 import { Cargo } from '../cargo/cargo';
-import { CargoRegistryApi } from '../cargo/cargo.typings';
+import { CargoRegistryApi } from '../cargo/registry.typings';
 import { IsTargetedCargoURI } from '../cargo/util';
-import { GuiAlertApi } from './alert';
-import { GuiDialogApi } from './dialog';
-import { GuiLeadApi } from './lead';
-import { GuiLoadApi } from './load';
-import { GuiMaskApi } from './mask';
-import { GuiMenuApi } from './menu';
-import { GuiPopupApi } from './popup';
-import { GuiScreenApi } from './screen';
-import { GuiToastApi } from './toast';
-import { GuiTopApi } from './top';
-import { GuiTransitionApi } from './transition';
-import { GuiTrumpetApi } from './trumpet';
-import { CargoGuiURI, GuiLayer } from './typings';
-import { GuiViewApi } from './view';
-import { GuiWorldApi } from './world';
-
-/** Gui 系统配置 */
-export interface GuiOotions extends KnotOptions {
-  /** LRU 缓存上限（默认 3） */
-  lru?: number;
-}
-
-/** Gui 系统接口 */
-export interface GuiApi extends KnotApi<GuiOotions> {
-  /**
-   * 打开视图
-   * @param uri 视图资产标识
-   */
-  open(uri: CargoGuiURI, args?: Record<string, unknown>): Promise<boolean>;
-  /**
-   * 关闭视图
-   * @param view 视图
-   */
-  close(view: GuiViewApi): Promise<boolean>;
-  /**
-   * 关闭视图层级
-   * @param layer 视图层级
-   */
-  closeLayer(layer: GuiLayer): Promise<void>;
-  /** 返回 */
-  back(): Promise<boolean>;
-  /** 聚焦到下一个顶层视图 */
-  focus(): void;
-  /** 使上一个顶层视图失焦 */
-  blur(): void;
-  /** 刷新遮罩 */
-  refreshMask(): void;
-}
+import { GuiAlertApi } from './alert.typings';
+import { GuiDialogApi } from './dialog.typings';
+import { CargoGuiItem, CargoGuiURI, GuiApi, GuiLayer, GuiOptions } from './gui.typings';
+import { GuiLeadApi } from './lead.typings';
+import { GuiLoadApi } from './load.typings';
+import { GuiMaskApi } from './mask.typings';
+import { GuiMenuApi } from './menu.typings';
+import { GuiPopupApi } from './popup.typings';
+import { GuiScreenApi } from './screen.typings';
+import { GuiToastApi } from './toast.typings';
+import { GuiTopApi } from './top.typings';
+import { GuiTransitionApi } from './transition.typings';
+import { GuiTrumpetApi } from './trumpet.typings';
+import { GuiViewApi } from './view.typings';
+import { GuiWorldApi } from './world.typings';
 
 /** Gui 系统结点 */
-export class Gui extends Knot<GuiOotions> implements GuiApi {
+export class Gui extends Knot<GuiOptions> implements GuiApi {
   // public
 
   declare public readonly cargo: Cargo;
@@ -86,6 +53,7 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
   public constructor() {
     super();
 
+    this.__registry = new Map();
     this.__requests = new Map();
   }
 
@@ -111,6 +79,27 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
       'alert',
       'top',
     ];
+  }
+
+  public register(item: CargoGuiItem): void {
+    if (this.__registry.has(item.uri)) {
+      this.logger.warn(`视图资产已注册 >>> ${item.uri}`);
+      return;
+    }
+
+    this.__registry.set(item.uri, item);
+  }
+
+  public registerBatch(items: CargoGuiItem[] | Record<string, CargoGuiItem>): void {
+    if (Array.isArray(items)) {
+      for (const item of items) {
+        this.register(item);
+      }
+    } else {
+      for (const key in items) {
+        this.register(items[key]);
+      }
+    }
   }
 
   public get stack(): GuiViewApi[] {
@@ -149,7 +138,7 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
       return Promise.resolve(false);
     }
 
-    const { lru, layer } = this.registry.get(view.uri)!;
+    const { lru, layer } = this.__registry.get(view.uri)!;
     const layerInst = this.__getLayerOf(layer!)!;
     const ok = await layerInst.preClose(view);
     if (!ok) {
@@ -244,6 +233,9 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
 
   // private
 
+  /** 注册表 */
+  private __registry: Map<CargoGuiURI, CargoGuiItem>;
+
   /** 打开请求 */
   private __requests: Map<CargoGuiURI, Promise<boolean>>;
   /** 视图缓存 */
@@ -292,13 +284,13 @@ export class Gui extends Knot<GuiOotions> implements GuiApi {
       return Promise.resolve(false);
     }
 
-    if (!this.registry.has(uri)) {
+    if (!this.registry.has(uri) || !this.__registry.has(uri)) {
       this.logger.warn(`视图资产未注册 >>> ${uri}`);
       return Promise.resolve(false);
     }
 
     // 校验注册参数
-    const { layer, alias, view, presenter, schema } = this.registry.get(uri)!;
+    const { layer, alias, view, presenter, schema } = this.__registry.get(uri)!;
 
     if (
       layer === undefined ||

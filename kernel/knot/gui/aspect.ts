@@ -10,58 +10,15 @@
 
 import { Layers, Node, UITransform } from 'cc';
 
-import { Knot, KnotApi, KnotOptions } from '../../core/knot';
+import { Knot } from '../../core/knot';
 import { SetProperty } from '../../skill/dict';
 import { LauncherApi } from '../launcher/launcher.typings';
-import { GuiApi } from './gui';
-import { CargoGuiURI, GuiLayer } from './typings';
-import { GuiViewApi } from './view';
-
-/** 视图层切片配置 */
-export interface GuiLayerApsectOptions extends KnotOptions {}
-
-/** 视图层切片接口 */
-export interface GuiLayerApsectApi extends KnotApi<GuiLayerApsectOptions> {
-  /** 指定资产标识的视图是否已打开 */
-  isOpen(uri: CargoGuiURI): boolean;
-  /**
-   * 打开视图前置校验
-   * @param uri 视图资产标识
-   */
-  preOpen(uri: CargoGuiURI): Promise<boolean>;
-  /**
-   * 打开视图
-   * @param view 视图
-   * @param struct 视图结构构造
-   */
-  didOpen(view: GuiViewApi): Promise<void>;
-  /**
-   * 关闭视图前置校验
-   * @param view 视图
-   */
-  preClose(view: GuiViewApi): Promise<boolean>;
-  /**
-   * 关闭视图
-   * @param view 视图
-   */
-  didClose(view: GuiViewApi): Promise<GuiViewApi>;
-  /** 关闭所有视图 */
-  closeAll(): Promise<void>;
-  /** 视图堆栈 */
-  get stack(): GuiViewApi[];
-  /** 顶层视图 */
-  get top(): GuiViewApi | undefined;
-  /** 所属层级 */
-  get layer(): GuiLayer;
-  /** 视图堆栈深度 */
-  get depth(): number;
-}
+import { GuiApsectApi, GuiApsectOptions } from './aspect.typings';
+import { CargoGuiURI, GuiApi, GuiLayer } from './gui.typings';
+import { GuiViewApi } from './view.typings';
 
 /** 视图层切片结点 */
-export abstract class GuiLayerApsect
-  extends Knot<GuiLayerApsectOptions>
-  implements GuiLayerApsectApi
-{
+export abstract class GuiLayerApsect extends Knot<GuiApsectOptions> implements GuiApsectApi {
   // public
 
   declare public readonly launcher: LauncherApi;

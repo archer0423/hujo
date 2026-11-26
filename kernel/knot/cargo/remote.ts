@@ -30,17 +30,12 @@ import {
 import { Knot } from '../../core/knot';
 import { Split } from '../../skill/list';
 import { CargoApi } from './cargo';
-import {
-  CargoLoadItem,
-  CargoLoadState,
-  CargoRegistryApi,
-  CargoRemoteApi,
-  CargoRemoteOptions,
-  CargoRemoteURI,
-} from './cargo.typings';
+import { CargoLoadItem, CargoLoadState, CargoRemoteURI } from './cargo.typings';
 import { ParseFnt } from './parser/fnt-parser';
 import { ParsePlistAtlas } from './parser/plist-parser';
 import { ParseSpineAtlas } from './parser/spine-atlas-parser';
+import { CargoRegistryApi } from './registry.typings';
+import { CargoRemoteApi, CargoRemoteOptions } from './remote.typings';
 import { ParseCargoURI } from './util';
 
 /** 远程加载器结点 */

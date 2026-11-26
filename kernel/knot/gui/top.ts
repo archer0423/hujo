@@ -9,15 +9,10 @@
  *******************************************/
 import { Widget } from 'cc';
 
-import { GuiLayerApsect, GuiLayerApsectApi, GuiLayerApsectOptions } from './layer';
-import { CargoGuiURI, GuiLayer } from './typings';
-import { GuiViewApi } from './view';
-
-/** 视图顶层配置 */
-export interface GuiTopOptions extends GuiLayerApsectOptions {}
-
-/** 视图顶层接口 */
-export interface GuiTopApi extends GuiLayerApsectApi {}
+import { GuiLayerApsect } from './aspect';
+import { CargoGuiURI, GuiLayer } from './gui.typings';
+import { GuiTopApi } from './top.typings';
+import { GuiViewApi } from './view.typings';
 
 /** 视图顶层结点 */
 export class GuiTop extends GuiLayerApsect implements GuiTopApi {

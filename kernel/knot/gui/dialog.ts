@@ -10,15 +10,10 @@
 
 import { Widget } from 'cc';
 
-import { GuiLayerApsect, GuiLayerApsectApi, GuiLayerApsectOptions } from './layer';
-import { CargoGuiURI, GuiLayer } from './typings';
-import { GuiViewApi } from './view';
-
-/** 普通模态弹窗层配置 */
-export interface GuiDialogOptions extends GuiLayerApsectOptions {}
-
-/** 普通模态弹窗层接口 */
-export interface GuiDialogApi extends GuiLayerApsectApi {}
+import { GuiLayerApsect } from './aspect';
+import { GuiDialogApi } from './dialog.typings';
+import { CargoGuiURI, GuiLayer } from './gui.typings';
+import { GuiViewApi } from './view.typings';
 
 /** 普通模态弹窗层结点 */
 export class GuiDialog extends GuiLayerApsect implements GuiDialogApi {

@@ -7,15 +7,10 @@
  * ╚═╝  ╚═╝  ╚═════╝   ╚════╝   ╚═════╝
  * Copyright (c) 2026 archer0423
  *******************************************/
-import { GuiLayerApsect, GuiLayerApsectApi, GuiLayerApsectOptions } from './layer';
-import { CargoGuiURI, GuiLayer } from './typings';
-import { GuiViewApi } from './view';
-
-/** 消息提示层配置 */
-export interface GuiToastOptions extends GuiLayerApsectOptions {}
-
-/** 消息提示层接口 */
-export interface GuiToastApi extends GuiLayerApsectApi {}
+import { GuiLayerApsect } from './aspect';
+import { CargoGuiURI, GuiLayer } from './gui.typings';
+import { GuiToastApi } from './toast.typings';
+import { GuiViewApi } from './view.typings';
 
 /** 消息提示层结点 */
 export class GuiToast extends GuiLayerApsect implements GuiToastApi {

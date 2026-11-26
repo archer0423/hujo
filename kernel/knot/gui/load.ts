@@ -10,15 +10,10 @@
 
 import { Widget } from 'cc';
 
-import { GuiLayerApsect, GuiLayerApsectApi, GuiLayerApsectOptions } from './layer';
-import { CargoGuiURI, GuiLayer } from './typings';
-import { GuiViewApi } from './view';
-
-/** 加载层配置 */
-export interface GuiLoadOptions extends GuiLayerApsectOptions {}
-
-/** 加载层接口 */
-export interface GuiLoadApi extends GuiLayerApsectApi {}
+import { GuiLayerApsect } from './aspect';
+import { CargoGuiURI, GuiLayer } from './gui.typings';
+import { GuiLoadApi } from './load.typings';
+import { GuiViewApi } from './view.typings';
 
 /** 加载层结点 */
 export class GuiLoad extends GuiLayerApsect implements GuiLoadApi {

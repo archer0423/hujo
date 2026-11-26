@@ -10,22 +10,11 @@
 
 import { Color, EventTouch, Graphics, Layers, Node, Widget } from 'cc';
 
-import { Knot, KnotApi, KnotOptions } from '../../core/knot';
+import { Knot } from '../../core/knot';
 import { LauncherApi } from '../launcher/launcher.typings';
-import { GuiApi } from './gui';
-import { GuiViewApi } from './view';
-
-/** 弹窗遮罩配置 */
-export interface GuiMaskOptions extends KnotOptions {
-  /** 颜色（包含透明度） */
-  color?: string;
-}
-
-/** 弹窗遮罩接口 */
-export interface GuiMaskApi extends KnotApi<GuiMaskOptions> {
-  show(view: GuiViewApi): void;
-  hide(): void;
-}
+import { GuiApi } from './gui.typings';
+import { GuiMaskApi, GuiMaskOptions } from './mask.typings';
+import { GuiViewApi } from './view.typings';
 
 /** 弹窗遮罩结点 */
 export class GuiMask extends Knot<GuiMaskOptions> implements GuiMaskApi {

@@ -13,14 +13,9 @@ import { assetManager } from 'cc';
 import { Knot } from '../../core/knot';
 import { Split } from '../../skill/list';
 import { CargoApi } from './cargo';
-import {
-  CargoDynamicApi,
-  CargoDynamicOptions,
-  CargoDynamicURI,
-  CargoLoadItem,
-  CargoLoadState,
-  CargoRegistryApi,
-} from './cargo.typings';
+import { CargoDynamicURI, CargoLoadItem, CargoLoadState } from './cargo.typings';
+import { CargoDynamicApi, CargoDynamicOptions } from './dynamic.typings';
+import { CargoRegistryApi } from './registry.typings';
 import { GetCargoFactory, IsValidCargoURI, ParseCargoURI } from './util';
 
 /**

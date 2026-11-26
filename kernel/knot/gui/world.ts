@@ -8,15 +8,10 @@
  * Copyright (c) 2026 archer0423
  *******************************************/
 
-import { GuiLayerApsect, GuiLayerApsectApi, GuiLayerApsectOptions } from './layer';
-import { CargoGuiURI, GuiLayer } from './typings';
-import { GuiViewApi } from './view';
-
-/** 世界层配置 */
-export interface GuiWorldOptions extends GuiLayerApsectOptions {}
-
-/** 世界层接口 */
-export interface GuiWorldApi extends GuiLayerApsectApi {}
+import { GuiLayerApsect } from './aspect';
+import { CargoGuiURI, GuiLayer } from './gui.typings';
+import { GuiViewApi } from './view.typings';
+import { GuiWorldApi } from './world.typings';
 
 /** 世界层结点 */
 export class GuiWorld extends GuiLayerApsect implements GuiWorldApi {

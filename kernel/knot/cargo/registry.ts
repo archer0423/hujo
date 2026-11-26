@@ -9,7 +9,8 @@
  *******************************************/
 
 import { Knot } from '../../core/knot';
-import { CargoItem, CargoRegistryApi, CargoRegistryOptions, CargoURI } from './cargo.typings';
+import { CargoItem, CargoURI } from './cargo.typings';
+import { CargoRegistryApi, CargoRegistryOptions } from './registry.typings';
 import { IsValidCargoURI } from './util';
 
 /** 资产注册表结点 */
@@ -52,9 +53,15 @@ export class CargoRegistry extends Knot<CargoRegistryOptions> implements CargoRe
     this.__registry.set(uri, item);
   }
 
-  public registerBatch(items: CargoItem[]): void {
-    for (const item of items) {
-      this.register(item);
+  public registerBatch(items: CargoItem[] | Record<string, CargoItem>): void {
+    if (Array.isArray(items)) {
+      for (const item of items) {
+        this.register(item);
+      }
+    } else {
+      for (const key in items) {
+        this.register(items[key]);
+      }
     }
   }
 

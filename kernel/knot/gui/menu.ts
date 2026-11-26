@@ -10,15 +10,10 @@
 
 import { Widget } from 'cc';
 
-import { GuiLayerApsect, GuiLayerApsectApi, GuiLayerApsectOptions } from './layer';
-import { CargoGuiURI, GuiLayer } from './typings';
-import { GuiViewApi } from './view';
-
-/** 主菜单层配置 */
-export interface GuiMenuOptions extends GuiLayerApsectOptions {}
-
-/** 主菜单层接口 */
-export interface GuiMenuApi extends GuiLayerApsectApi {}
+import { GuiLayerApsect } from './aspect';
+import { CargoGuiURI, GuiLayer } from './gui.typings';
+import { GuiMenuApi } from './menu.typings';
+import { GuiViewApi } from './view.typings';
 
 /** 主菜单层结点 */
 export class GuiMenu extends GuiLayerApsect implements GuiMenuApi {
