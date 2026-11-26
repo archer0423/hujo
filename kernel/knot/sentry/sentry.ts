@@ -14,7 +14,7 @@ import { Knot } from '../../core/knot';
 import { Now } from '../../skill/datetime';
 import { OS } from '../../skill/env';
 import { HashFNV1a } from '../../skill/literal';
-import { AccessApi } from '../access';
+import { AccessApi } from '../access/access.typings';
 import {
   SentryApi,
   SentryErrorType,
