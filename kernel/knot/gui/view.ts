@@ -10,18 +10,27 @@ import { GuiViewApi } from './view.typings';
 export abstract class GuiPresenter<V extends GuiViewApi> {
   // public
 
+  /**
+   * 构造
+   * @param view 视图
+   */
   public constructor(public readonly view: V) {}
 
+  /** 日志记录器 */
   public get logger(): JournalLogger {
     return journal.acquire('gui');
   }
 
+  /** 初始化 */
   public abstract init(): void;
 
+  /** 反初始化 */
   public abstract deinit(): void;
 
+  /** 视图聚焦 */
   public focus() {}
 
+  /** 视图失焦 */
   public blur() {}
 
   // protected
