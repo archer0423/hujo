@@ -106,6 +106,7 @@ export abstract class DTO<D extends object = {}> {
   /**
    * 便捷监听
    * @param property 属性
+   * @param once 是否一次性
    */
   protected _watch(property: string, once: boolean = false) {
     this.on(property, this._notify.bind(this, property), once);
@@ -121,7 +122,7 @@ export abstract class DTO<D extends object = {}> {
     if (this.__listeners.has(property)) {
       const items = this.__listeners.get(property)!;
       for (const item of items) {
-        RunSync(item, item.caller, newV, oldV);
+        RunSync(item, undefined, newV, oldV);
         if (this.__onceMappings.get(item)) {
           items.delete(item);
         }
