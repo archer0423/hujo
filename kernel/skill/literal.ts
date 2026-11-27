@@ -173,3 +173,17 @@ export function HashFNV1a(text: string) {
   }
   return (h >>> 0).toString(16).padStart(8, '0');
 }
+
+const NumberFormats: Record<string, Intl.NumberFormat> = Object.create(null);
+
+/**
+ * 将数字转换为千分位形式
+ * @param num 数字
+ * @param locales 区域
+ * @returns 数字的千分位形式
+ */
+export function ToThousands(num: number | string, locales = 'en-US') {
+  const value = typeof num === 'string' ? Number(num) : num;
+  if (Number.isNaN(value)) return '';
+  return (NumberFormats[locales] ??= new Intl.NumberFormat(locales)).format(value);
+}
