@@ -116,15 +116,40 @@ export function Sec2Ms(sec: number): number {
 /**
  * 秒数转换为时分秒格式（例如：100秒 => 00:01:40）
  * @param seconds - 秒数（非整数与超出 32 位范围的输入按 `seconds | 0` 截断为有符号 32 位整数）
+ * @param depth - 降级深度（0:时分秒 1:分秒 2:秒）
  * @returns 时分秒格式字符串
  */
-export function Sec2HMS(seconds: number): string {
+export function Sec2HMS(seconds: number, depth: 0 | 1 | 2 = 0): string {
   seconds = seconds | 0;
   const hour = (seconds / TIME.SEC.HOUR) | 0;
   // 分钟须先对小时取余，否则超过 1 小时后会溢出（如 3700s → 61 分）
   const min = ((seconds % TIME.SEC.HOUR) / TIME.SEC.MINUTE) | 0;
   const sec = seconds % TIME.SEC.MINUTE;
-  return [hour, min, sec].map((v) => v.toString().padStart(2, '0')).join(':');
+  let ret!: number[];
+  switch (depth) {
+    case 0:
+      ret = [hour, min, sec];
+      break;
+    case 1:
+      if (hour === 0) {
+        ret = [min, sec];
+      } else {
+        ret = [hour, min, sec];
+      }
+      break;
+    case 2:
+      if (hour === 0) {
+        if (min === 0) {
+          ret = [sec];
+        } else {
+          ret = [min, sec];
+        }
+      } else {
+        ret = [hour, min, sec];
+      }
+      break;
+  }
+  return ret.map((v) => v.toString().padStart(2, '0')).join(':');
 }
 
 /**
