@@ -66,12 +66,18 @@ export interface CargoApi extends KnotApi<CargoOptions> {
    * 批量加载资产
    * @param items 入参资产
    * @param parallels 每批次并发数量
+   * @param onprogress 进度更新回调
    */
-  loadBatch(items: CargoURI[], parallels?: number): Promise<void>;
+  loadBatch(
+    items: CargoURI[],
+    parallels?: number,
+    onprogress?: (curr: number, total: number) => void,
+  ): Promise<void>;
   /** 中断资产加载 */
   abort(uri: CargoURI): void;
   /** 批量中断资产加载 */
   abortBatch(items: CargoURI[]): void;
+  removeBundle(name: string): void;
 }
 
 /** 资产管理结点 */
@@ -95,6 +101,14 @@ export class Cargo extends Knot<CargoOptions> implements CargoApi {
 
   public override get deps() {
     return ['registry', 'dynamic', 'remote'];
+  }
+
+  public removeBundle(name: string): void {
+    const bundle = assetManager.getBundle(name);
+    if (bundle) {
+      bundle.releaseAll();
+      assetManager.removeBundle(bundle);
+    }
   }
 
   public has(uri: CargoURI) {
@@ -129,6 +143,12 @@ export class Cargo extends Knot<CargoOptions> implements CargoApi {
     if (this.__items.has(uri)) {
       this.__lookup.delete(this.__items.get(uri)!.asset);
       this.__items.delete(uri);
+      const [protocol] = ParseCargoURI(uri);
+      if (protocol === 'remote') {
+        this.remote.abort(uri as CargoRemoteURI);
+      } else {
+        this.dynamic.abort(uri as CargoDynamicURI);
+      }
     }
   }
 
@@ -205,9 +225,19 @@ export class Cargo extends Knot<CargoOptions> implements CargoApi {
     });
   }
 
-  public loadBatch(items: CargoURI[], parallels?: number) {
+  public loadBatch(
+    items: CargoURI[],
+    parallels?: number,
+    onprogress?: (curr: number, total: number) => void,
+  ) {
     return new Promise<void>((resolve) => {
-      const promises = items.map((item) => this.load(item));
+      let curr = 0;
+      const total = items.length;
+      const promises = items.map(async (item) => {
+        const result = await this.load(item);
+        onprogress?.(++curr, total);
+        return result;
+      });
       if (parallels && Number.isInteger(parallels) && parallels > 0) {
         const wrappers = Split(promises, parallels).map((item) => Promise.all(item));
         Promise.all(wrappers).then(() => resolve());
@@ -267,7 +297,7 @@ export class Cargo extends Knot<CargoOptions> implements CargoApi {
     if (this.__items.has(uri)) {
       now ??= Now();
       const digest = this.__items.get(uri)!;
-      if (digest.ref === 0 && now - digest.recent > digest.ttl) {
+      if (digest.ref === 0 && digest.ttl >= 0 && now - digest.recent >= digest.ttl) {
         this.delete(uri);
         assetManager.releaseAsset(digest.asset);
         this.logger.debug(`释放资产 >>> ${uri}`);
