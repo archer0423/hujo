@@ -16,16 +16,16 @@ import { Label } from 'cc';
  * @param listener 监听器
  * @returns
  */
-export function Watch<H extends object>(host: H, listener: (p: PropertyKey, v: any) => void) {
+export function Watch<H extends object>(host: H, listener: (p: keyof H, v: any, o: any) => void) {
   return new Proxy(host, {
     set(target, p, newValue) {
-      // @ts-ignore
-      if (target[p] === newValue) {
+      const ctx = target as any;
+      if (ctx[p] === newValue) {
         return false;
       }
-      // @ts-ignore
-      target[p] = newValue;
-      listener(p, newValue);
+      const oldValue = ctx[p];
+      ctx[p] = newValue;
+      listener(p as keyof H, newValue, oldValue);
       return true;
     },
   });
@@ -41,11 +41,11 @@ export function Watch<H extends object>(host: H, listener: (p: PropertyKey, v: a
 export function WatchProperty<H extends object>(
   host: H,
   property: keyof H,
-  listener: (v: any) => void,
+  listener: (v: any, o: any) => void,
 ) {
-  return Watch(host, (p, v) => {
+  return Watch(host, (p, v, o) => {
     if (p === property) {
-      listener(v);
+      listener(v, o);
     }
   });
 }
@@ -57,16 +57,11 @@ export function WatchProperty<H extends object>(
  * @param mappings 主从属性映射
  * @returns
  */
-export function WatchMapping(
-  master: object,
-  salve: object,
-  mappings: Record<PropertyKey, PropertyKey>,
-) {
+export function WatchMapping(master: object, salve: object, mappings: Record<string, string>) {
   return Watch(master, (p, v) => {
-    // @ts-ignore
-    if (typeof salve[mappings[p]] !== 'undefined') {
-      // @ts-ignore
-      salve[mappings[p]] = v;
+    const key = mappings[p];
+    if (key in salve) {
+      (<any>salve)[key] = v;
     }
   });
 }
